@@ -1,0 +1,33 @@
+<%+cbi/valueheader%>
+
+<script type="text/javascript">//<![CDATA[
+	
+
+	function test_result(btn)
+	{
+		btn.disabled = true;
+		btn.value    = '<%:测试中...%>';
+
+		XHR.get('<%=luci.dispatcher.build_url("admin", "posset", "test_status")%>',null,
+			function(x, rv)
+		{
+			var s = document.getElementById('<%=self.option%>-result-status');
+			if (s)
+			{
+				s.innerHTML = rv.timestring || '?';
+			}
+			btn.disabled = false;
+			btn.value    = '<%:点击测试%>';
+		}
+
+		);
+
+		return false;
+	}
+//]]></script>
+
+<span id="<%=self.option%>-result-status"></span>
+<input type="button" class="cbi-button cbi-button-apply" value="<%:点击测试%>" onclick="return test_result(this)" />
+
+<%+cbi/valuefooter%>
+

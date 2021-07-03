@@ -1,0 +1,16 @@
+Package: kmod-drv_regopt
+Version: <LINUX_VERSION>-1
+Depends: 
+Menu-Depends: 
+Provides: 
+Section: kernel
+Category: Kernel modules
+Title: 
+Maintainer: 
+Source: 
+Type: ipkg
+Description: 
+
+@@
+
+Makefile:51: *** Package/kmod-drv_regopt is missing the TITLE field.  Stop.
