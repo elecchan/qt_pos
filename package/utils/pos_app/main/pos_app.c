@@ -3,17 +3,17 @@
 #include <stdio.h>
 #include <sys/shm.h>
 #include <pthread.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 #include "shmdata.h"
 #include "conf_op.h"
 #include "ipc_op.h"
 #include "dev_op.h"
 #include "parse_printer.h"
+#include "config.h"
+#include "hp303_hal.h"
 
-#define Debug 0
-#define UART_INIT 1
-//接收串口最大数据缓存 128KB
-#define MAX 128*1024
 int first_run(void);
 void do_main(void);
 //串口数据缓存跟临时缓存
@@ -32,6 +32,7 @@ int recovery = 0;
 int usleep_count = 0;
 int uart_send_flag = 0;
 
+#ifdef SUPPORT_INT_DETECTION
 //线程,不断获取中断状态
 void *read_int_thread(void) {
 	int int_count;
@@ -64,6 +65,7 @@ void *read_int_thread(void) {
 		usleep(50*1000);//50ms
 	}
 }
+#endif
 //再开启一个线程,判断复位按键以及恢复出厂设置按键的检测
 void *read_key_thread(void) {
 	while(1) {
@@ -101,21 +103,42 @@ void *read_key_thread(void) {
 	}
 }
 
+#ifdef SUPPORT_HP303S
+void *read_hp303s_thread(void) {
+	while(1) {
+		
+		usleep(50*1000);//50ms
+	}
+}
+#endif
+
+#ifdef SUPPORT_INT_DETECTION
+	pthread_t read_int_id = NULL;
+#endif
+#ifdef SUPPORT_HP303S
+	pthread_t read_hp303s_id = NULL;
+	int hp303s_fd = 0;
+#endif
+
 int main()
 {
 	int ret,i;
-	pthread_t read_int_id = NULL;
 	pthread_t read_key_id = NULL;
 	if(Debug)
 		printf( "page size=%d\n",getpagesize(  ) );
 	//开机-根据配置文件是否初始化设备
 	first_run();
 	//开启两个线程,一个检测电梯一个检测按键
+#ifdef SUPPORT_INT_DETECTION
 	ret = pthread_create(&read_int_id, NULL, (void*)read_int_thread, NULL);
     if(ret){
         printf("Create int pthread error!/n");
         //return 1;
     }
+#endif
+#ifdef SUPPORT_HP303S
+	
+#endif
     ret = pthread_create(&read_key_id, NULL, (void*)read_key_thread, NULL);
     if(ret){
         printf("Create key pthread error!/n");
@@ -213,6 +236,7 @@ int main()
 }
 
 int first_run(void) {
+	int ret = 0;
 	//创建共享内存
 	creat_shm();
 	//初始化配置
@@ -220,15 +244,27 @@ int first_run(void) {
 	parse_ipc_conf();
 	parse_floor_conf();
 	//设置底层楼层计数
+#ifdef SUPPORT_INT_DETECTION
 	set_int_count(floor_conf->currentFloor);
+#endif
 	parse_pos_conf();
 	//初始化设备
 	init_dev();
 	//串口初始化,看情况是否添加
-	#ifdef UART_INIT
+#ifdef UART_INIT
 	system("reg s 0xb0000000");
 	system("reg w 0x60 0x00583701");
-	#endif
+#endif
+
+#ifdef SUPPORT_HP303S
+	//ttyS0 as simulate I2C
+	if(true == HP303_open()) {
+		ret = pthread_create(&read_hp303s_id, NULL, (void*)read_hp303s_thread, NULL);
+   		 if(ret){
+        	printf("Create hp303s pthread error!/n");
+   		}
+	}
+#endif
 	return 0;
 }
 

@@ -37,4 +37,5 @@ int set_int_count(int data);
 #define KEY_DEV "/dev/gpio_key"
 int key_press(void);
 /*******************************************************************/
+
 #endif
