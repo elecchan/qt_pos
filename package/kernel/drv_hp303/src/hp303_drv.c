@@ -196,9 +196,11 @@ static void i2c_send(unsigned char addr,int reg,int reg_len,unsigned char data,i
 	i2c_send_byte(addr|0x01);
 	status = i2c_read_ack();	
 	
-	for(i=0;i<data_len;i++)
+	for(i=0;i<(data_len-1);i++) {
 		data[i] = i2c_read_byte();
-	
+		i2c_ack();
+	}
+	data[i] = i2c_read_byte();
 	i2c_no_ack();
 	i2c_stop();
 	return data_len;
@@ -289,20 +291,24 @@ static bool HP303_i2c_test(uint8_t addr)
 	uint8_t id;	
 	HP303_read8(addr,HP303_COEF_REG_ADDR,&id);
 	WLT_Printk("hp303 get conf=0x%x",id);
-	if(id == 0x0c)
+	if(id == 0x0c) {
+		HP303_read8(addr,HP303_COEF_REG_ADDR + 1,&id);
+		WLT_Printk("hp303 get conf2=0x%x",id);
 		return true;
+	}
+	
 	return false;
 }
 
 static int HP303_read_calib_coeffs(void)
 {
-    int ret;
+    int ret,i;
     uint8_t read_buffer[HP303_COEF_LEN] = {0};
 	uint8_t data;
 
 	ret = i2c_read(i2c_addr,HP303_COEF_REG_ADDR,1,read_buffer,HP303_COEF_LEN);
 	printk("%s:",__func__);
-	for(int i = 0;i < ret;i++)
+	for(i = 0;i < ret;i++)
 		printk("%d ",read_buffer[i]);
 	printk("\n");
     if(ret != HP303_COEF_LEN)
@@ -476,11 +482,13 @@ static int HP303_measure(struct HP303_report_s *pf)
 int HP303_resume(void)
 {
     s32 ret;
+    u8 reg;
 
     ret = HP303_write8(i2c_addr,HP303_MEAS_CFG_REG_ADDR,(u8)HP303_MODE_BACKGROUND_ALL);
     if(ret < 0)
 		return -EIO;
-
+	HP303_read8(i2c_addr,HP303_MEAS_CFG_REG_ADDR,&reg);
+	WLT_Printk("get meas reg val = 0x%x",reg);
     return 0;
 }
 
