@@ -287,9 +287,9 @@ int HP303_write8(uint8_t addr,uint8_t reg,uint8_t val)
 static bool HP303_i2c_test(uint8_t addr)
 {
 	uint8_t id;	
-	HP303_read8(addr,HP303_PROD_REV_ID_REG_ADDR,&id);
-	WLT_Printk("hp303 get id=%d",id);
-	if(id == 16)
+	HP303_read8(addr,HP303_COEF_REG_ADDR,&id);
+	WLT_Printk("hp303 get conf=0x%x",id);
+	if(id == 0x0c)
 		return true;
 	return false;
 }
@@ -301,6 +301,10 @@ static int HP303_read_calib_coeffs(void)
 	uint8_t data;
 
 	ret = i2c_read(i2c_addr,HP303_COEF_REG_ADDR,1,read_buffer,HP303_COEF_LEN);
+	printk("%s:",__func__);
+	for(int i = 0;i < ret;i++)
+		printk("%d ",read_buffer[i]);
+	printk("\n");
     if(ret != HP303_COEF_LEN)
 		return ret;
 
