@@ -134,7 +134,7 @@ bool HP303_read(float dt,float * pres,float * alt,float * temp)
 		if(pressure_ref != 0)
 			{
 			alt_tmp = HP303_altitude_convert(pressure_tmp,pressure_ref);
-			printf("%3.3f %3.3f %3.3f (%3.3f)\r\n",alt_tmp,pressure_tmp,temp_tmp,pressure_ref);
+			//printf("%3.3f %3.3f %3.3f (%3.3f)\r\n",alt_tmp,pressure_tmp,temp_tmp,pressure_ref);
 			
 			*alt = alt_tmp;
 			*pres = pressure_tmp;
@@ -154,7 +154,22 @@ bool HP303_read(float dt,float * pres,float * alt,float * temp)
 	}
 }
 
+static float prev_altitu = 0;
+void altitu_algm(float altitu)
+{
+	float curent_altitu = 0;
+	static float diff_altitu = 0;
+	if(fabs(altitu - prev_altitu) < 0.05) 
+		diff_altitu += (altitu - prev_altitu);
+	prev_altitu = altitu;
+	curent_altitu = altitu - diff_altitu;
+	printf("altitu = %fm,diff_altitu = %fm,curent_altitu = %fm\n",altitu,diff_altitu,curent_altitu);
+}
+
 void main(void) {
+	float diff = 0;
+	float altitu_prev = 0;
+	int leaf = 0;
 	printf("hp303 test...\n");
 	float press,altitu,temp;
 	if(HP303_open() == false) {
@@ -162,8 +177,12 @@ void main(void) {
 	}
 	while(1) {
 		if(HP303_read(0.05,&press,&altitu,&temp) == true) {
-			printf("press = %f,altitu = %f,temp = %f\n",press,altitu,temp);
+			leaf++;
+			if(leaf > 5) {
+				altitu_algm(altitu);
+			}else
+				prev_altitu = altitu;		
 		}
-		usleep(50 * 1000);
+		usleep(500 * 1000);
 	}
 }
