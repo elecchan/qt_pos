@@ -136,6 +136,23 @@ local nodisp = s:taboption("floor_set", Value, "nodisp",translate("掠过楼层"
 local yue = s:taboption("floor_set", Value, "rename",translate("地上地下楼层的显示名称"),translate("默认显示是楼层数后带'F',可自定义显示"))
 local change = s:taboption("floor_set", Value, "change",translate("改名楼层"),translate("示例:-4:D,14:1D,楼层与改名之间要以半角冒号':'隔开,负楼层用'-'表示, 一定要以半角逗号','结束,最多只能改名10层楼"))
 
+--altitu set
+s:tab("altitu_set", translate("altitu set"))
+min_val = s:taboption("altitu_set", Value, "min_lv",translate("min楼层"))
+btn_max = s:taboption("altitu_set", Button, "button")             
+btn_max.inputtitle = translate("按下重启")      
+btn_max.inputstyle = "reload" 
+function btn_max.write(self, section, value)    
+		min_val.value = "jjjj"
+        --luci.sys.call("echo reboot > /dev/console ")  
+        --btn_max.inputtitle = translate("重启中,等会手动刷新界面...")   
+      	--luci.sys.call("reboot")                        
+end
+
+s:taboption("altitu_set", Value, "max_lv",translate("max楼层"))
+s:taboption("altitu_set", Value, "average_lv",translate("average"))
+s:taboption("altitu_set", Value, "special_lv",translate("special楼层"))
+
 function m.on_commit(map)
 	luci.sys.call("/usr/bin/ipc_conf")
 end
