@@ -210,10 +210,10 @@ void average_filter(float altitu)
 		altitu_sum = 0;
 		if(fabs(average - altitu_prev) >= 0.05) {
 			if(moving == 1) {
-				move_distance += fabs(average - altitu_prev);
+				move_distance += average - altitu_prev;
 			}else {
 				moving = 1;
-				move_distance += fabs(average - altitu_prev);
+				move_distance += average - altitu_prev;
 			}
 
 		}else {
