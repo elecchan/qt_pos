@@ -154,16 +154,79 @@ bool HP303_read(float dt,float * pres,float * alt,float * temp)
 	}
 }
 
+typedef struct KalFilterInstT_ {
+	float Q;// process variance
+	float P;
+	float R;
+	float lastValue;
+}KalFilterInst;
+void KalmanFilterInit(KalFilterInst* kfInst, float r)
+{
+	kfInst->Q = 1e-5;// process variance
+	kfInst->P = 1;
+	kfInst->R = r;
+	kfInst->lastValue = 0;
+}
+
+void KalmanFilter(KalFilterInst* kfInst, float* in, float* out)
+{
+	float Pminus, K;
+	Pminus = kfInst->P + kfInst->Q;
+	K = Pminus / (Pminus + kfInst->R);
+	out[0] = kfInst->lastValue + K * (in[0] - kfInst->lastValue);
+
+	kfInst->lastValue = out[0];
+	kfInst->P = (1 - K) * Pminus;
+}
+KalFilterInst kfInstance;
+
 static float prev_altitu = 0;
 void altitu_algm(float altitu)
 {
 	float curent_altitu = 0;
+	float kalman_altitu = 0;
 	static float diff_altitu = 0;
 	if(fabs(altitu - prev_altitu) < 0.05) 
 		diff_altitu += (altitu - prev_altitu);
 	prev_altitu = altitu;
 	curent_altitu = altitu - diff_altitu;
-	printf("altitu = %fm,diff_altitu = %fm,curent_altitu = %fm\n",altitu,diff_altitu,curent_altitu);
+	KalmanFilter(&kfInstance,&altitu,&kalman_altitu);
+	printf("altitu = %dcm,kalman_altitu = %dcm,diff_altitu = %fm,curent_altitu = %fm\n",(int)(altitu*100),(int)(kalman_altitu*100),diff_altitu,curent_altitu);
+}
+
+void average_filter(float altitu)
+{
+	static uint8_t cnt = 0;
+	static float altitu_sum = 0;
+	static float altitu_prev = 0;
+	static uint8_t moving = 0;
+	static float move_distance = 0;
+	float average = 0;
+	cnt++;
+	altitu_sum += altitu;
+	if(cnt >= 5) {
+		average = altitu_sum/cnt;
+		cnt = 0;
+		altitu_sum = 0;
+		if(fabs(average - altitu_prev) >= 0.05) {
+			if(moving == 1) {
+				move_distance += fabs(average - altitu_prev);
+			}else {
+				moving = 1;
+				move_distance += fabs(average - altitu_prev);
+			}
+
+		}else {
+			if(moving == 1) {
+				printf("moving end,moving distance = %dcm\n",(int)(move_distance*100));
+				moving = 0;
+				move_distance = 0;
+			}
+		}
+		altitu_prev = average;
+		printf("altitu = %dcm\n",(int)(average*100));
+	}
+
 }
 
 void main(void) {
@@ -175,14 +238,16 @@ void main(void) {
 	if(HP303_open() == false) {
 		return;
 	}
+	KalmanFilterInit(&kfInstance,0.0001);
 	while(1) {
 		if(HP303_read(0.05,&press,&altitu,&temp) == true) {
 			leaf++;
 			if(leaf > 5) {
-				altitu_algm(altitu);
+				//altitu_algm(altitu);
+				average_filter(altitu);
 			}else
 				prev_altitu = altitu;		
 		}
-		usleep(500 * 1000);
+		usleep(50 * 1000);
 	}
 }
