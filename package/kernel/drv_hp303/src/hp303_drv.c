@@ -40,6 +40,7 @@
 */
 
 static unsigned char i2c_addr = SENSOR_I2C_SLAVE_ADDRESS<<1;
+struct mutex rw_mutex;
 
 void hp303_gpio_init(void) {
 	uint32_t reg = 0;
@@ -533,33 +534,22 @@ static int hp303_read (struct file *fp, char __user *usr_buf, size_t length, lof
 	int ret;
 	struct HP303_report_s data;
 	WLT_Printk("%s",__func__);
+	mutex_lock(&rw_mutex);
 	copy_from_user((void *)&data,usr_buf,sizeof(data));
-	
 	ret = HP303_measure(&data);
 	if(ret < 0){
 		WLT_Printk("%s measure err",__func__);
+		mutex_unlock(&rw_mutex);
 		return -1;
 	}
-	
 	copy_to_user(usr_buf,(void *)&data,sizeof(data));
+	mutex_unlock(&rw_mutex);
     return 1;
 }
 
 
 int hp303_open(struct inode *inode, struct file *fp){
     WLT_Printk("%s",__func__);
-    int ret;
-
-	if(HP303_i2c_test(i2c_addr) == false){
-		WLT_Printk("hp303 detect err");
-		return -1;
-	}
-	
-	ret = HP303_init_client();
-	if(ret < 0){
-		return -1;
-	}
-	
     return 0;
 }
 
@@ -583,19 +573,33 @@ static struct miscdevice hp303_dev={
 struct kobject *all_node_device = NULL;
 static int __init hp303_init(void)
 {
+	int ret;
 	WLT_Printk("%s",__func__);
     misc_register(&hp303_dev);
 	hp303_gpio_init();
+	mutex_init(&rw_mutex);
+	if(HP303_i2c_test(i2c_addr) == false){
+		WLT_Printk("hp303 detect err");
+		goto err;
+	}
+	
+	ret = HP303_init_client();
+	if(ret < 0)
+		goto err;
 	all_node_device = kobject_create_and_add("hp303", NULL);
     if (all_node_device == NULL) {
         pr_err("%s: subsystem_register failed\n", __func__);
-        return -1;
+        goto err;
     }
     int rc = sysfs_create_group(all_node_device, &all_node_attr_group);
     if (rc) {
         pr_err("%s: sysfs_create_file failed\n", __func__);
         kobject_del(all_node_device);
     }
+	return 0;
+err:
+	misc_deregister(&hp303_dev);
+	hp303_gpio_free();
 	return 0;
 }
 
