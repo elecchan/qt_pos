@@ -7,10 +7,10 @@ module("luci.controller.admin.posset", package.seeall)
 function index()
 	entry({"admin", "posset", "ipcset"}, cbi("admin_posset/ipcset"), _("IPC设置"), 1).index=true
 	entry({"admin", "posset", "posset"}, cbi("admin_posset/posset"), _("POS机设置"), 10)
-	entry({"admin", "posset", "test_status"}, call("action_test_status"))
+	entry({"admin", "posset", "calc_average"}, call("action_calc_average"))
 end
 
-function action_test_status()
+function action_calc_average()
 	local set = tonumber(luci.http.formvalue("set"))
 	if set ~= nil and set > 0 then
 		local date = os.date("*t", set)
@@ -24,3 +24,4 @@ function action_test_status()
 	luci.http.prepare_content("application/json")
 	luci.http.write_json({ timestring = os.date("%c") })
 end
+

@@ -8,7 +8,7 @@ local fs    = require "nixio.fs"
 local conf  = require "luci.config"
 local ut = require "luci.util"
 
-local m, s, o
+local m, s, o, al
 m = Map("floorset", translate("楼层设置"))
 m:chain("luci")
 
@@ -137,21 +137,16 @@ local yue = s:taboption("floor_set", Value, "rename",translate("地上地下楼�
 local change = s:taboption("floor_set", Value, "change",translate("改名楼层"),translate("示例:-4:D,14:1D,楼层与改名之间要以半角冒号':'隔开,负楼层用'-'表示, 一定要以半角逗号','结束,最多只能改名10层楼"))
 
 --altitu set
-s:tab("altitu_set", translate("altitu set"))
-min_val = s:taboption("altitu_set", Value, "min_lv",translate("min楼层"))
-btn_max = s:taboption("altitu_set", Button, "button")             
-btn_max.inputtitle = translate("按下重启")      
-btn_max.inputstyle = "reload" 
-function btn_max.write(self, section, value)    
-		min_val.value = "jjjj"
-        --luci.sys.call("echo reboot > /dev/console ")  
-        --btn_max.inputtitle = translate("重启中,等会手动刷新界面...")   
-      	--luci.sys.call("reboot")                        
-end
-
-s:taboption("altitu_set", Value, "max_lv",translate("max楼层"))
-s:taboption("altitu_set", Value, "average_lv",translate("average"))
-s:taboption("altitu_set", Value, "special_lv",translate("special楼层"))
+--al = m:section(NamedSection, "altitu")
+--al.addremove = false
+--al.anonymous = true
+s:tab("altitu_set", translate("高度校准"))
+local first = s:taboption("altitu_set", DummyValue, "altitu_1", translate("起点高度(米)"))
+first.template = "admin_louxianset/get_altitu"
+local second = s:taboption("altitu_set", DummyValue, "altitu_2", translate("终点高度(米)"))
+second.template = "admin_louxianset/get_altitu_2"
+local average = s:taboption("altitu_set", DummyValue, "altitu_a", translate("平均高度(米)"))
+average.template = "admin_louxianset/get_average"
 
 function m.on_commit(map)
 	luci.sys.call("/usr/bin/ipc_conf")
