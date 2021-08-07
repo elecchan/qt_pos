@@ -334,10 +334,10 @@ int main()
 				//set_int_count(floor_conf->currentFloor);
 				//清除显示
 				if((i = findIpcVersionIndex()) != -1) {
-					ipcFmt->func(" ",50,50, 1,0);
-					ipcFmt->func(" ",50,100,2,0);
-					ipcFmt->func(" ",50,150,3,0);
-					ipcFmt->func(" ",50,200,4,0);
+					ipcFmt[i].func(" ",50,50, 1,0);
+					ipcFmt[i].func(" ",50,100,2,0);
+					ipcFmt[i].func(" ",50,150,3,0);
+					ipcFmt[i].func(" ",50,200,4,0);
 				}
 			}
 			//如果pos显示打开
@@ -346,7 +346,7 @@ int main()
 				parse_pos_conf();
 				//清除显示
 				if((i = findIpcVersionIndex()) != -1) 
-					ipcFmt->func(" ",ipc_conf->xPosition,ipc_conf->yPosition,1,0);
+					ipcFmt[i].func(" ",ipc_conf->xPosition,ipc_conf->yPosition,1,0);
 				if((0 < ipc_conf->refresh) &&(ipc_conf->refresh < 10))
 					delay = ipc_conf->refresh;//获取ipc字符刷新周期
 				else 
@@ -449,7 +449,7 @@ void do_main() {
 		//满足以下两个要求,更新ipc显示
 		if((ipc_conf->dataUpdate == 1) || (floor_conf->dataUpdate == 1)) {
 			if((i = findIpcVersionIndex()) != -1) {
-				ipcFmt->func(ipc_conf->mess,ipc_conf->xPosition,ipc_conf->yPosition,1,1);
+				ipcFmt[i].func(ipc_conf->mess,ipc_conf->xPosition,ipc_conf->yPosition,1,1);
 			}
 			ipc_conf->dataUpdate = 0;
 			floor_conf->dataUpdate = 0;
@@ -480,7 +480,7 @@ void do_main() {
 				get_printer_data(uart_buf,out_buf,uart_len-1);
 				if((i = findPosVersionIndex()) != -1) {
 					//将解析出来的串口数据out_buf显示到ipc上
-					posFmt->func(out_buf,4,delay);
+					posFmt[i].func(out_buf,4,delay);
 				}
 				//清除缓存
 				memset(out_buf,0,sizeof(out_buf));
@@ -497,10 +497,10 @@ void do_main() {
 		if((usleep_count > 30) && (uart_send_flag == 1)) {
 			uart_send_flag = 0;
 			if((i = findIpcVersionIndex()) != -1) {
-				ipcFmt->func(" ",50,50, 1,0);
-				ipcFmt->func(" ",50,100,2,0);
-				ipcFmt->func(" ",50,150,3,0);
-				ipcFmt->func(" ",50,200,4,0);
+				ipcFmt[i].func(" ",50,50, 1,0);
+				ipcFmt[i].func(" ",50,100,2,0);
+				ipcFmt[i].func(" ",50,150,3,0);
+				ipcFmt[i].func(" ",50,200,4,0);
 			}
 		}
 	}else {

@@ -22,7 +22,7 @@ char *str;
 int init_conf(void) 
 {
 	//内存分配
-	floor_conf = malloc(2048);
+	floor_conf = malloc(4096);
 	ipc_conf->useful = 0;
 	ipc_conf->recvBit = 0;
 	ipc_conf->messCh = 1;//
@@ -65,6 +65,9 @@ int parse_ipc_conf(void)
 		break;
 		case 3:
 		strcpy(ipc_conf->productName ,"xiongmai");	
+		break;
+		case 4:
+		strcpy(ipc_conf->productName ,"uniview");	
 		break;
 		default:
 		strcpy(ipc_conf->productName ,"unknow");
@@ -158,7 +161,7 @@ int parse_floor_conf(void)
 	strcpy(floor_conf->reName,retMsg);
 	//解析不显示楼层,跃层,改名楼层
 	int i = 0;
-	char temp[1110];
+	char temp[2048];
 	char *ptr;
 	memset(temp,0,sizeof(temp)); 
 	memset(floor_conf->noDisp,0,sizeof(floor_conf->noDisp));
@@ -279,7 +282,7 @@ int it_is_disp_floor(int floor) {
 //否:返回-1
 int it_is_change_name(int floor) {
 	int i;
-	for(i=0;i<10;i++) {
+	for(i=0;i<50;i++) {
 		if(floor == floor_conf->changeName[i].number)
 			return i;
 	}
