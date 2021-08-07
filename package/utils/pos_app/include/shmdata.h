@@ -1,13 +1,13 @@
 #ifndef _SHMDATA_H_HEADER  
 #define _SHMDATA_H_HEADER  
- 
+#include "config.h"
 //共享内存ID
 #define SHM_IPC_ID    111
 #define SHM_FLOOR_ID  222
 #define SHM_POS_ID    333
 //申请共享内存大小，单位B
 #define TEXT_SZ 4096  
- 
+
 //IPC配置信息
 struct shared_ipc_conf  
 {  
@@ -60,7 +60,15 @@ struct shared_floor_conf
 	ChangeFloor changeName[10]; 
 	//统一改名
 	char reName[100];
-	
+#ifdef SUPPORT_HP303S
+	int floorAltitu;
+	int useAltitu;
+	int diffFloorAltituCnt;
+	struct DiffFloorAltitu {
+		int floor;
+		int altitu;
+	}diffFloorAltitu[16];
+#endif
 	unsigned int reserve[32];
 };
 

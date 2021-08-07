@@ -110,7 +110,8 @@ bool HP303_read(float dt,float * pres,float * alt,float * temp)
 	float pressure_tmp;
 	float temp_tmp;
 	float alt_tmp;
-
+	char cmd[64];
+	memset(cmd,0,sizeof(cmd));
 	HP303_timer += dt;
 	HP303_init_timer += dt;
 	if(HP303_timer > (0.04f))
@@ -127,21 +128,24 @@ bool HP303_read(float dt,float * pres,float * alt,float * temp)
 		HP303_convert(&report_HP303,&pressure_tmp,&temp_tmp);
 
 		if(HP303_init_timer >= 1.0f && pressure_ref == 0)
-			{
+		{
 			pressure_ref = pressure_tmp;
-			}
+			sprintf(cmd,"uci set floorset.altitu.standar=%f",pressure_ref);
+			printf("set statndar:%s\n",cmd);
+			system(cmd);
+			system("uci commit");
+		}
 
 		if(pressure_ref != 0)
-			{
+		{
 			alt_tmp = HP303_altitude_convert(pressure_tmp,pressure_ref);
 			//printf("%3.3f %3.3f %3.3f (%3.3f)\r\n",alt_tmp,pressure_tmp,temp_tmp,pressure_ref);
 			
 			*alt = alt_tmp;
 			*pres = pressure_tmp;
 			*temp = temp_tmp;
-
 			return true;
-			}
+		}
 		else
 			{
 			return false;

@@ -32,6 +32,21 @@ int recovery = 0;
 int usleep_count = 0;
 int uart_send_flag = 0;
 
+const char * status_to_string(uint8_t status)
+{
+	switch(status)
+	{
+		case UP:
+			return "UP";
+		case DOWN:
+			return "DOWN";
+		case PAUSE:
+			return "PAUSE";
+		case EXCEPTION:
+			return "EXCEPTION";
+	}
+	return "DEFAULT";
+}
 #ifdef SUPPORT_INT_DETECTION
 //线程,不断获取中断状态
 void *read_int_thread(void) {
@@ -104,10 +119,170 @@ void *read_key_thread(void) {
 }
 
 #ifdef SUPPORT_HP303S
+#define ALLOW_DIFF 5
+enum Status {
+	MOVE_STOP = 1,
+	MOVE_UP,
+	MOVE_DOWN,
+	MOVE_FAULT,
+};
+struct MoveStatus {
+	enum Status status;
+	uint8_t last_status;
+	uint16_t keep_status;
+	int32_t move_distance;
+	int32_t current_altitu;
+	struct Show {
+		uint8_t show_update;
+		uint8_t show_status;
+		uint8_t show_floor;
+	}mShow;
+};
+struct MoveStatus mMoveStatus = {MOVE_STOP,0,0};
+void get_altitu_and_calc(void)
+{
+	int i = 0;
+	float press,altitu,temp;
+	float altitu_sum = 0;
+	float average = 0;
+	static float altitu_prev = 0;
+	static uint8_t moving = 0;
+	static float move_distance = 0;
+	for(i=0;i<5;i++)
+	{
+		HP303_read(0.05,&press,&altitu,&temp);
+		altitu_sum += altitu;
+		usleep(10*1000);
+	}
+	average = altitu_sum/5;//m
+	mMoveStatus.current_altitu = average;
+	printf("average altitu = %dcm\n",(int)(average*100));
+	if(fabs(average - altitu_prev) >= 0.05) {
+		if(moving != 1) 
+			moving = 1;
+		move_distance += average - altitu_prev;
+		mMoveStatus.move_distance = (int32_t)(move_distance*100);
+		if(move_distance > 0)
+			mMoveStatus.status = MOVE_UP;
+		else
+			mMoveStatus.status = MOVE_DOWN;
+	}else {
+		if(moving == 1) {
+			printf("moving end,moving distance = %dcm\n",(int)(move_distance*100));
+			moving = 0;		
+			mMoveStatus.move_distance = (int32_t)(move_distance*100);
+			move_distance = 0;
+			mMoveStatus.status = MOVE_STOP;
+		}
+	}
+	altitu_prev = average;
+}
+int get_floor_by_altitu(void)
+{
+	get_altitu_and_calc();
+		//printf("hp303 get data,altitu = %dcm\n",(int)altitu*100);
+	//1.get move status
+	if(mMoveStatus.status != mMoveStatus.last_status)
+	{
+		mMoveStatus.keep_status = 0;
+		mMoveStatus.last_status = mMoveStatus.status;
+	}
+	else
+	{
+		mMoveStatus.keep_status++;
+		if(mMoveStatus.keep_status >= 2)
+		{
+			mMoveStatus.keep_status = 1;
+			if(mMoveStatus.status == MOVE_STOP)
+				floor_conf->floorStatus = PAUSE;
+			else if(mMoveStatus.status == MOVE_UP)
+				floor_conf->floorStatus = UP;
+			else if(mMoveStatus.status == MOVE_DOWN)
+				floor_conf->floorStatus = DOWN;
+			else
+				floor_conf->floorStatus = EXCEPTION;
+		}
+
+	}
+	//2.calc floor
+	if(floor_conf->useAltitu == 1)
+	{
+		//
+		if(floor_conf->floorStatus == PAUSE)
+		{
+			if(mMoveStatus.move_distance > 0)
+			{
+				if((mMoveStatus.move_distance > (floor_conf->floorAltitu - ALLOW_DIFF)) && (mMoveStatus.move_distance < (floor_conf->floorAltitu + ALLOW_DIFF)))
+					floor_conf->currentFloor++;
+			}
+			else if(mMoveStatus.move_distance < 0)
+			{
+				if((mMoveStatus.move_distance > (-floor_conf->floorAltitu - ALLOW_DIFF)) && (mMoveStatus.move_distance < (-floor_conf->floorAltitu + ALLOW_DIFF)))
+					floor_conf->currentFloor--;
+			}
+			mMoveStatus.move_distance = 0;
+		}
+		else if(floor_conf->floorStatus == UP)
+		{
+			//normal
+			if(mMoveStatus.move_distance >= floor_conf->floorAltitu)
+			{
+				floor_conf->currentFloor++;
+				mMoveStatus.move_distance -= floor_conf->floorAltitu;
+			}
+		}
+		else if(floor_conf->floorStatus == DOWN)
+		{
+			if(abs(mMoveStatus.move_distance) >= floor_conf->floorAltitu)
+			{
+				floor_conf->currentFloor--;
+				mMoveStatus.move_distance += floor_conf->floorAltitu;
+			}
+		}
+	}
+	return floor_conf->currentFloor;
+}
 void *read_hp303s_thread(void) {
+	int leaf = 0;
+	printf("read_hp303s_thread...\n");
+	float press,altitu,temp;
+	float prev_altitu = 0;
+	if(HP303_open() == false) {
+		return;
+	}
 	while(1) {
-		
-		usleep(50*1000);//50ms
+		if(HP303_read(0.05,&press,&altitu,&temp) == false) {
+			usleep(50*1000);
+		}
+		else
+			break;
+	}
+	while(1) {
+		//获取当前楼层
+		floor_conf->currentFloor = get_floor_by_altitu();
+		if((floor_conf->currentFloor != floor_conf->lastFloor) || (floor_conf->floorStatus != floor_conf->lastFloorStatus)) {
+			//判断电梯层数是否在设置范围内,如果是才更新楼层显示
+			if(floor_conf->currentFloor < 0) {
+				if(abs(floor_conf->currentFloor) <= floor_conf->floorBelow) {				
+					floor_conf->dataUpdate = 1;//楼层数据更新,ipc显示也要更新
+				}else {
+					floor_conf->currentFloor = floor_conf->lastFloor;
+					//电梯楼层超出设置范围,重新设置当前楼层
+					//set_int_count(floor_conf->currentFloor);
+				}
+			}else {
+				if(floor_conf->currentFloor <= floor_conf->floorAbove) {
+					floor_conf->dataUpdate = 1;
+				}else {
+					floor_conf->currentFloor = floor_conf->lastFloor;
+					//set_int_count(floor_conf->currentFloor);
+				}
+			}
+			floor_conf->lastFloor = floor_conf->currentFloor;
+			floor_conf->lastFloorStatus = floor_conf->floorStatus;
+			printf("-------------floor status update,floor=%d,status=%s\n",floor_conf->currentFloor,status_to_string(floor_conf->floorStatus));
+		}
+		usleep(100*1000);
 	}
 }
 #endif

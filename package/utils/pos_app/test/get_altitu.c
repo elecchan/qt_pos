@@ -5,9 +5,65 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "hp303_hal.h"
+#include <string.h>
+
+int uci_get(const char * cmd, char *retmsg, int msg_len)
+{
+    FILE * fp;
+    int res = -1;
+    if (cmd == NULL || retmsg == NULL || msg_len < 0)
+    {
+        printf("Err: Fuc:system paramer invalid!\n");
+        return 1;
+    }
+    if ((fp = popen(cmd, "rw") ) == NULL)
+    {
+        perror("popen");
+        printf("Err: Fuc:popen error\n");
+        return 2;
+    }
+    else
+    {
+        memset(retmsg, 0, msg_len);
+        fread(retmsg, msg_len, 1,fp);
+        if((res = pclose(fp)) == -1)
+        {
+            printf("Fuc:close popen file pointer fp error!\n");
+            return 3;
+        }
+        
+        retmsg[strlen(retmsg)-1] = '\0';
+        return 0;
+    }
+}
+
+typedef struct
+{
+	int16_t	C0;
+	int16_t	C1;
+	int32_t	C00;
+	int32_t	C10;
+	int16_t	C01;
+	int16_t	C11;
+	int16_t	C20;
+	int16_t	C21;
+	int16_t	C30;
+	uint32_t tmp_osr_scale_coeff;
+	uint32_t prs_osr_scale_coeff;
+}HP303_calib_data;
+
+typedef struct{
+	uint8_t  pressure[3];
+	uint8_t  temperature[3];
+	HP303_calib_data calib_coeffs;
+}HP303_report_s;
+
+#define HP303_UPDATE_RATE 50
 
 static int HP303_fd = -1;
+
+#define POW_2_23_MINUS_1	0x7FFFFF   //implies 2^23-1
+#define POW_2_24			0x1000000
 
 void HP303_convert(HP303_report_s * rp,float * pressure,float *temp)
 {
@@ -76,56 +132,54 @@ bool HP303_open()
 	return true;
 }
 
-bool HP303_read(float dt,float * pres,float * alt,float * temp)
+bool HP303_read(float standar,float * pres,float * alt,float * temp)
 {
-	static float HP303_timer = 0.0f;
-	static float HP303_init_timer = 0.0f;
-	static float pressure_ref;
 	HP303_report_s report_HP303; 
 	float pressure_tmp;
 	float temp_tmp;
 	float alt_tmp;
-	char cmd[64];
-	memset(cmd,0,sizeof(cmd));
-	HP303_timer += dt;
-	HP303_init_timer += dt;
-	if(HP303_timer > (0.04f))
-		HP303_timer = 0.0f;
-	else
-		return false;
-	
+
 	if(read(HP303_fd,&report_HP303,sizeof(report_HP303)) > 0)
 	{
 		HP303_convert(&report_HP303,&pressure_tmp,&temp_tmp);
-		if(HP303_init_timer >= 1.0f && pressure_ref == 0)
-		{
-			pressure_ref = pressure_tmp;
-			sprintf(cmd,"uci set floorset.altitu.standar=%f",pressure_ref);
-			printf("hp303 set statndar:%s\n",cmd);
-			system(cmd);
-			system("uci commit");
-		}
-
-		if(pressure_ref != 0)
-		{
-			alt_tmp = HP303_altitude_convert(pressure_tmp,pressure_ref);
-			//printf("%3.3f %3.3f %3.3f (%3.3f)\r\n",alt_tmp,pressure_tmp,temp_tmp,pressure_ref);
-			
-			*alt = alt_tmp;
-			*pres = pressure_tmp;
-			*temp = temp_tmp;
-
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		alt_tmp = HP303_altitude_convert(pressure_tmp,standar);
+		*alt = alt_tmp;
+		*pres = pressure_tmp;
+		*temp = temp_tmp;
 		return true;
 	}
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
+void main(void) {
+	int leaf = 0;
+	float press,altitu,temp;
+	float altitu_sum = 0;
+	char retmsg[16];
+	float standar = 0;
+	memset(retmsg,0,sizeof(retmsg));
+	if(HP303_open() == false) {
+		printf("-1\n");
+		return;
+	}
+	uci_get("uci get floorset.altitu.standar",retmsg,sizeof(retmsg));
+	standar = atof(retmsg);
+	//printf("get standar:%s %f\n",retmsg,standar);
+	while(1) {
+		if(HP303_read(standar,&press,&altitu,&temp) == true) {
+			leaf++;
+			if(leaf > 5) {
+				printf("%d\n",(int)altitu_sum/5);
+				return;
+			}
+			else
+				altitu_sum += (altitu*100);	
+			usleep(50 * 1000);	
+		}
+		else {
+			printf("-1\n");
+			return;
+		}
+		
+	}
+}

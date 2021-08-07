@@ -8,4 +8,6 @@ $CC conf/pos_conf.c -I include/ -o conf/pos_conf
 $CC conf/ipc_conf.c -I include/ -o conf/ipc_conf
 #for test
 $CC test/hp303_test.c -lm -o hp303_test
+#for get altitu
+$CC test/get_altitu.c -lm -o get_altitu
 #$CC conf/floor_conf.c -I include/ -o conf/floor_conf

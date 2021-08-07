@@ -10,8 +10,9 @@
 #include "conf_op.h"
 #include "uci_op.h"
 #include "dev_op.h"
+#include "config.h"
 
-#define Debug 1
+//#define Debug 1
 
 //获取uci配置项返回值
 char retMsg[50];
@@ -164,6 +165,15 @@ int parse_floor_conf(void)
 	uci_get(get_floor_nodisp,temp,sizeof(temp));
 	ptr = temp;
 	//printf("nodisp 1:%s %d\n",ptr,atoi(ptr));
+#ifdef SUPPORT_HP303S
+	uci_get(get_floor_altitu,retMsg,sizeof(retMsg));
+	floor_conf->floorAltitu = atoi(retMsg);//get altitu for average
+	if(floor_conf->floorAltitu <= 0)//adjust if altitu is useful
+		floor_conf->useAltitu = 0;
+	else
+		floor_conf->useAltitu = 1;
+	printf("--------get average altitu=%d,flag=%d\n",floor_conf->floorAltitu,floor_conf->useAltitu);
+#endif
 	while(atoi(ptr) != 0) {
 		if(atoi(ptr) < -9) {
 			break;

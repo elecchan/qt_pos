@@ -6,7 +6,7 @@
 //#define SUPPORT_INT_DETECTION
 
 #define Debug 0
-#define UART_INIT 1
+//#define UART_INIT 1
 //接收串口最大数据缓存 128KB
 #define MAX 128*1024
 

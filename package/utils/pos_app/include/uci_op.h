@@ -1,6 +1,6 @@
 #ifndef _UCI_OP_H_HEADER  
 #define _UCI_OP_H_HEADER  
-
+#include "config.h"
 int get_uci(const char * cmd, char *retmsg, int msg_len);
 
 //指令集
@@ -26,6 +26,9 @@ char *get_floor_nodisp   = "uci get floorset.floor.nodisp";
 char *get_floor_rename   = "uci get floorset.floor.rename";
 char *get_floor_change   = "uci get floorset.floor.change";
 
+#ifdef SUPPORT_HP303S
+char *get_floor_altitu   = "uci get floorset.altitu.average";
+#endif
 //POS conmand
 char *get_pos_interfacetype = "uci get posset.interface.interfacetype";
 //char *get_pos_ttyenabled = "uci get posset.interface.ttyenabled";
