@@ -1,0 +1,33 @@
+<%+cbi/valueheader%>
+
+<script type="text/javascript">//<![CDATA[
+	
+
+	function get_altitu_2(btn)
+	{
+		btn.disabled = true;
+		btn.value    = '<%:获取中...%>';
+
+		XHR.get('<%=luci.dispatcher.build_url("admin", "help", "get_altitu_2")%>',null,
+			function(x, rv)
+		{
+			var s = document.getElementById('<%=self.option%>-result-altitu2');
+			if (s)
+			{
+				s.innerHTML = rv.timestring || '?';
+			}
+			btn.disabled = false;
+			btn.value    = '<%:获取数据%>';
+		}
+
+		);
+
+		return false;
+	}
+//]]></script>
+
+<span id="<%=self.option%>-result-altitu2"></span>
+<input type="button" class="cbi-button cbi-button-apply" value="<%:获取数据%>" onclick="return get_altitu_2(this)" />
+
+<%+cbi/valuefooter%>
+

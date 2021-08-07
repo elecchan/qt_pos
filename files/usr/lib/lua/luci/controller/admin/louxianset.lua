@@ -11,17 +11,13 @@ function index()
 end
 
 function action_get_altitu()
+	local x = luci.model.uci.cursor()
 	local set = tonumber(luci.http.formvalue("set"))
-	if set ~= nil and set > 0 then
-		local date = os.date("*t", set)
-		if date then
-			luci.sys.call("date -s '%04d-%02d-%02d %02d:%02d:%02d'" %{
-				date.year, date.month, date.day, date.hour, date.min, date.sec
-			})
-		end
-	end
-
+	local altitu 
+	altitu = luci.sys.exec("/usr/bin/get_altitu")
+	luci.sys.exec("uci set floorset.altitu.first=%d" % altitu)
+	luci.sys.exec("uci commit")
 	luci.http.prepare_content("application/json")
-	luci.http.write_json({ timestring = os.date("%c") })
+	luci.http.write_json({ timestring = altitu })
 end
 

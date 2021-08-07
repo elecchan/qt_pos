@@ -25,11 +25,13 @@ local ipctype = s:taboption("ipc_set", ListValue, "type",translate("IPC类型"))
 ipctype :value(1,translate("海康"))
 ipctype :value(2,translate("大华"))
 ipctype :value(3,translate("雄迈"))
+ipctype :value(4,translate("宇视"))
 
 local ipcversion = s:taboption("ipc_set", ListValue, "ipcversion",translate("型号"))
 ipcversion:value("Default")
 ipcversion:value("DS-2CD3320D-I")
 ipcversion:value("DS-2CC52D5S-IT3")
+ipcversion:value("IPC-S322-IR")
 --username
 local ipcuser = s:taboption("ipc_set", Value, "username",translate("用户名"))
 

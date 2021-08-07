@@ -1,0 +1,33 @@
+<%+cbi/valueheader%>
+
+<script type="text/javascript">//<![CDATA[
+	
+
+	function get_average(btn)
+	{
+		btn.disabled = true;
+		btn.value    = '<%:获取中...%>';
+
+		XHR.get('<%=luci.dispatcher.build_url("admin", "posset", "calc_average")%>',null,
+			function(x, rv)
+		{
+			var s = document.getElementById('<%=self.option%>-result-average');
+			if (s)
+			{
+				s.innerHTML = rv.timestring || '?';
+			}
+			btn.disabled = false;
+			btn.value    = '<%:获取数据%>';
+		}
+
+		);
+
+		return false;
+	}
+//]]></script>
+
+<span id="<%=self.option%>-result-average"></span>
+<input type="button" class="cbi-button cbi-button-apply" value="<%:获取数据%>" onclick="return get_average(this)" />
+
+<%+cbi/valuefooter%>
+

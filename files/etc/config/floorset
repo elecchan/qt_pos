@@ -1,2 +1,10 @@
 config floorpara floor
+	option below 0
+	option above 0
+
+config floorpara altitu
+	option first 0
+	option second 0
+	option average 0
+	option standar 0
         

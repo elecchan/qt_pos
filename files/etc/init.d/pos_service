@@ -2,7 +2,8 @@
 
 START=94
 
-insmod /lib/modules/3.10.14/mt7620_gpio_int.ko
+#insmod /lib/modules/3.10.14/mt7620_gpio_int.ko
+insmod /lib/modules/3.10.14/hp303_drv.ko
 insmod /lib/modules/3.10.14/mt7620_gpio_key.ko
 /usr/bin/pos_app &
 

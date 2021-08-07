@@ -134,18 +134,19 @@ f:value(99,translate("99"))
 
 local nodisp = s:taboption("floor_set", Value, "nodisp",translate("掠过楼层"),translate("楼层数之间以半角逗号隔开"))
 local yue = s:taboption("floor_set", Value, "rename",translate("地上地下楼层的显示名称"),translate("默认显示是楼层数后带'F',可自定义显示"))
-local change = s:taboption("floor_set", Value, "change",translate("改名楼层"),translate("示例:-4:D,14:1D,楼层与改名之间要以半角冒号':'隔开,负楼层用'-'表示, 一定要以半角逗号','结束,最多只能改名10层楼"))
+local change = s:taboption("floor_set", Value, "change",translate("改名楼层"),translate("示例:\"-4:D,14:1D\",楼层与改名之间要以半角冒号':'隔开,负楼层用'-'表示, 一定要以半角逗号','结束,最多只能改名10层楼"))
+local high = s:taboption("floor_set", Value, "high",translate("特殊层高"),translate("示例:\"1:380,2:350\",层高单位cm,层高之间要以半角冒号':'隔开,负楼层用'-'表示, 一定要以半角逗号','结束,最多只能改名10层楼"))
 
 --altitu set
 --al = m:section(NamedSection, "altitu")
 --al.addremove = false
 --al.anonymous = true
 s:tab("altitu_set", translate("高度校准"))
-local first = s:taboption("altitu_set", DummyValue, "altitu_1", translate("起点高度(米)"))
+local first = s:taboption("altitu_set", DummyValue, "altitu_1", translate("起点高度(厘米)"))
 first.template = "admin_louxianset/get_altitu"
-local second = s:taboption("altitu_set", DummyValue, "altitu_2", translate("终点高度(米)"))
+local second = s:taboption("altitu_set", DummyValue, "altitu_2", translate("终点高度(厘米)"))
 second.template = "admin_louxianset/get_altitu_2"
-local average = s:taboption("altitu_set", DummyValue, "altitu_a", translate("平均高度(米)"))
+local average = s:taboption("altitu_set", DummyValue, "altitu_a", translate("平均高度(厘米)"))
 average.template = "admin_louxianset/get_average"
 
 function m.on_commit(map)
