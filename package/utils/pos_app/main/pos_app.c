@@ -119,7 +119,7 @@ void *read_key_thread(void) {
 }
 
 #ifdef SUPPORT_HP303S
-#define ALLOW_DIFF 5
+#define ALLOW_DIFF 50	//cm
 enum Status {
 	MOVE_STOP = 1,
 	MOVE_UP,
@@ -220,7 +220,8 @@ int get_floor_by_altitu(void)
 				if((mMoveStatus.move_distance > (-floor_conf->floorAltitu - ALLOW_DIFF)) && (mMoveStatus.move_distance < (-floor_conf->floorAltitu + ALLOW_DIFF)))
 					floor_conf->currentFloor--;
 			}
-			mMoveStatus.move_distance = 0;
+			if(mMoveStatus.status == MOVE_STOP)
+				mMoveStatus.move_distance = 0;
 		}
 		else if(floor_conf->floorStatus == UP)
 		{
