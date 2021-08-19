@@ -119,7 +119,7 @@ void *read_key_thread(void) {
 }
 
 #ifdef SUPPORT_HP303S
-#define ALLOW_DIFF 50	//cm
+#define ALLOW_DIFF 100	//cm
 enum Status {
 	MOVE_STOP = 1,
 	MOVE_UP,
@@ -157,11 +157,11 @@ void get_altitu_and_calc(void)
 	average = altitu_sum/5;//m
 	mMoveStatus.current_altitu = average;
 	printf("average altitu = %dcm\n",(int)(average*100));
-	if(fabs(average - altitu_prev) >= 0.05) {
+	if(fabs(average - altitu_prev) >= 0.05) {//前后两次高度差达到一定范围认为是移动了
 		if(moving != 1) 
 			moving = 1;
 		move_distance += average - altitu_prev;
-		mMoveStatus.move_distance = (int32_t)(move_distance*100);
+		mMoveStatus.move_distance = (int32_t)(move_distance*100);//转化为cm
 		if(move_distance > 0)
 			mMoveStatus.status = MOVE_UP;
 		else
@@ -220,7 +220,7 @@ int get_floor_by_altitu(void)
 				if((mMoveStatus.move_distance > (-floor_conf->floorAltitu - ALLOW_DIFF)) && (mMoveStatus.move_distance < (-floor_conf->floorAltitu + ALLOW_DIFF)))
 					floor_conf->currentFloor--;
 			}
-			if(mMoveStatus.status == MOVE_STOP)
+			//if(mMoveStatus.status == MOVE_STOP)
 				mMoveStatus.move_distance = 0;
 		}
 		else if(floor_conf->floorStatus == UP)
@@ -251,6 +251,7 @@ void *read_hp303s_thread(void) {
 	if(HP303_open() == false) {
 		return;
 	}
+	//开始过滤掉无用数据
 	while(1) {
 		if(HP303_read(0.05,&press,&altitu,&temp) == false) {
 			usleep(50*1000);
