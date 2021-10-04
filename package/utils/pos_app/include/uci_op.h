@@ -28,6 +28,7 @@ char *get_floor_change   = "uci get floorset.floor.change";
 
 #ifdef SUPPORT_HP303S
 char *get_floor_altitu   = "uci get floorset.altitu.average";
+char *get_floor_total    = "uci get floorset.altitu.total";
 #endif
 //POS conmand
 char *get_pos_interfacetype = "uci get posset.interface.interfacetype";

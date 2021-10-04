@@ -303,6 +303,17 @@ static int hk_ipc_str(char *disp,int x,int y,int id,int disp_floor) {
 			if(floor_conf->floorStatus == EXCEPTION)
 				strcat(strtemp,exception_utf8);
 			strcat(diejiastr,strtemp);
+#if 1
+			sprintf(strtemp,"(%d",floor_conf->floorAltitu);
+            strcat(diejiastr,strtemp);
+            sprintf(strtemp,":%d",floor_conf->currentAltitu);
+            strcat(diejiastr,strtemp);
+            sprintf(strtemp,":%d)",floor_conf->floorAltituTotal);
+            strcat(diejiastr,strtemp);
+            sprintf(strtemp,"(%d/%d)",floor_conf->floorAbove,floor_conf->floorBelow);
+            strcat(diejiastr,strtemp);
+#endif
+			printf("==========hk_ipc_str show mess:%s\n",strtemp);
 		}
 	}
 	strcat(diejiastr,"</displayText>\r\n");
