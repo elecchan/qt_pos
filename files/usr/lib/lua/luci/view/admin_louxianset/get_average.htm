@@ -8,13 +8,13 @@
 		btn.disabled = true;
 		btn.value    = '<%:获取中...%>';
 
-		XHR.get('<%=luci.dispatcher.build_url("admin", "posset", "calc_average")%>',null,
+		XHR.get('<%=luci.dispatcher.build_url("admin", "louxianset", "calc_average")%>',null,
 			function(x, rv)
 		{
 			var s = document.getElementById('<%=self.option%>-result-average');
 			if (s)
 			{
-				s.innerHTML = rv.timestring || '?';
+				s.innerHTML = rv.floor_average || '?';
 			}
 			btn.disabled = false;
 			btn.value    = '<%:获取数据%>';

@@ -289,14 +289,14 @@ int get_floor_by_altitu(void)
 		}
 #else
 		floor_conf->currentAltitu = mMoveStatus.total_altitu;
-		if(PAUSE == floor_conf->floorStatus)
+		if((PAUSE == floor_conf->floorStatus) || (UP == floor_conf->floorStatus))
 			float_floor = (float)mMoveStatus.total_altitu / (float)floor_conf->floorAltitu + 0.3 - floor_conf->floorBelow + 1;
 			//floor_conf->currentFloor = floor((mMoveStatus.total_altitu * 13) / (10 *floor_conf->floorAltitu)) - floor_conf->floorBelow + 1;
-		else if(UP == floor_conf->floorStatus)
-			float_floor = (float)mMoveStatus.total_altitu / (float)floor_conf->floorAltitu - floor_conf->floorBelow + 1;
+		//else if(UP == floor_conf->floorStatus)
+			//float_floor = (float)mMoveStatus.total_altitu / (float)floor_conf->floorAltitu - floor_conf->floorBelow + 1;
 			//floor_conf->currentFloor = floor(mMoveStatus.total_altitu / floor_conf->floorAltitu) - floor_conf->floorBelow + 1;
 		else if(DOWN == floor_conf->floorStatus)
-			float_floor = (float)mMoveStatus.total_altitu / (float)floor_conf->floorAltitu + 0.8 - floor_conf->floorBelow + 1;
+			float_floor = (float)mMoveStatus.total_altitu / (float)floor_conf->floorAltitu + 0.7 - floor_conf->floorBelow + 1;
 		floor_conf->currentFloor = (int)float_floor;
 		if(PAUSE == floor_conf->floorStatus) {
 			if(it_is_first_floor() > 0)
@@ -353,7 +353,7 @@ void *read_hp303s_thread(void) {
 			floor_conf->lastFloorStatus = floor_conf->floorStatus;
 			printf("-------------floor status update,floor=%d,status=%s\n",floor_conf->currentFloor,status_to_string(floor_conf->floorStatus));
 		}
-		usleep(300*1000);
+		usleep(250*1000);
 	}
 }
 #endif
