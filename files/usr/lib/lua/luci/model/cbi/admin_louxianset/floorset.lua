@@ -148,6 +148,11 @@ local second = s:taboption("altitu_set", DummyValue, "altitu_2", translate("终�
 second.template = "admin_louxianset/get_altitu_2"
 local average = s:taboption("altitu_set", DummyValue, "altitu_a", translate("平均高度(厘米)"))
 average.template = "admin_louxianset/get_average"
+--local average = s:taboption("altitu_set", DummyValue, "altitu_a", translate("数据类型"))
+--average.template = "admin_louxianset/list_altitu"
+--local list = s:taboption("altitu_set",ListValue,"above",translate("地面层数"), translate("楼层数包含不显示楼层/跃层/改名楼层"))
+--list:value(0,translate("0"))
+--list:value(1,translate("1"))
 
 function m.on_commit(map)
 	luci.sys.call("/usr/bin/ipc_conf")

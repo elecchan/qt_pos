@@ -1,0 +1,468 @@
+Content-Length: 0
+
+< HTTP/1.1 401 Unauthorized
+< Date: Thu, 01 Jan 1970 01:21:55 GMT
+< Server: App-webs/
+< Content-Length: 178
+< Content-Type: text/html
+< Connection: close
+< WWW-Authenticate: Digest qop="auth", realm="DS-2CD3335D-I", nonce="4d7a55304e6b5133526a63364e4749774d475135", stale="FALSE"
+< WWW-Authenticate: Basic realm="DS-2CD3335D-I"
+< 
+* Closing connection 0
+* Issue another request to this URL: 'http://192.168.1.64//ISAPI/System/Video/inputs/channels/1/overlays/text/1'
+* Hostname 192.168.1.64 was found in DNS cache
+*   Trying 192.168.1.64...
+* TCP_NODELAY set
+* Connected to 192.168.1.64 (192.168.1.64) port 80 (#1)
+* Server auth using Digest with user 'admin'
+> PUT //ISAPI/System/Video/inputs/channels/1/overlays/text/1 HTTP/1.1
+Host: 192.168.1.64
+Authorization: Digest username="admin", realm="DS-2CD3335D-I", nonce="4d7a55304e6b5133526a63364e4749774d475135", uri="//ISAPI/System/Video/inputs/channels/1/overlays/text/1", cnonce="Njg2YTFjYmUyZDVlMjVhYWU2MDBmYWU3NWJhMmFiMjE=", nc=00000001, qop=auth, response="2b11c9600da51b4565bde541259b534d"
+Accept: */*
+Content-Type:text/xml
+Content-Length: 259
+
+send len=259
+* We are completely uploaded and fine
+< HTTP/1.1 200 OK
+< Date: Thu, 01 Jan 1970 01:21:55 GMT
+< Server: App-webs/
+< Connection: close
+< Content-Length: 309
+< Content-Type: application/xml
+< 
+<?xml version="1.0" encoding="UTF-8"?>
+<ResponseStatus version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">
+<requestURL>/ISAPI/System/Video/inputs/channels/1/overlays/text/1</requestURL>
+<statusCode>1</statusCode>
+<statusString>OK</statusString>
+<subStatusCode>ok</subStatusCode>
+</ResponseStatus>
+* Closing connection 1
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+start moving...........
+change status...........
+floor--........
+moving end,moving distance = -5cm
+change status...........
+floor--........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+start moving...........
+change status...........
+floor--........
+moving end,moving distance = -5cm
+change status...........
+floor--........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+start moving...........
+change status...........
+floor++........
+moving end,moving distance = 8cm
+change status...........
+floor++........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+
+
+move_distance=0........
+
+start moving...........
+change status...........
+floor++........
+floor++........
+floor up........41 368
+-------------floor status update,floor=0,status=UP
+=======hk_ipc_str=======
+*   Trying 192.168.1.64...
+* TCP_NODELAY set
+* Connected to 192.168.1.64 (192.168.1.64) port 80 (#0)
+* Server auth using Digest with user 'admin'
+> PUT //ISAPI/System/Video/inputs/channels/1/overlays/text/1 HTTP/1.1
+Host: 192.168.1.64
+Accept: */*
+Content-Type:text/xml
+Content-Length: 0
+
+< HTTP/1.1 401 Unauthorized
+< Date: Thu, 01 Jan 1970 01:22:12 GMT
+< Server: App-webs/
+< Content-Length: 178
+< Content-Type: text/html
+< Connection: close
+< WWW-Authenticate: Digest qop="auth", realm="DS-2CD3335D-I", nonce="4e44453052555178513051364e4749304e474d32", stale="FALSE"
+< WWW-Authenticate: Basic realm="DS-2CD3335D-I"
+< 
+* Closing connection 0
+* Issue another request to this URL: 'http://192.168.1.64//ISAPI/System/Video/inputs/channels/1/overlays/text/1'
+* Hostname 192.168.1.64 was found in DNS cache
+*   Trying 192.168.1.64...
+* TCP_NODELAY set
+* Connected to 192.168.1.64 (192.168.1.64) port 80 (#1)
+* Server auth using Digest with user 'admin'
+> PUT //ISAPI/System/Video/inputs/channels/1/overlays/text/1 HTTP/1.1
+Host: 192.168.1.64
+Authorization: Digest username="admin", realm="DS-2CD3335D-I", nonce="4e44453052555178513051364e4749304e474d32", uri="//ISAPI/System/Video/inputs/channels/1/overlays/text/1", cnonce="NTE1YTA4YTBiMzIxYTFjM2FiNGVjNjg5Mjg5ODg3MmQ=", nc=00000001, qop=auth, response="b35ba34cef9cdc763921fa2c302c9b74"
+Accept: */*
+Content-Type:text/xml
+Content-Length: 259
+
+send len=259
+* We are completely uploaded and fine
+floor up........52 368
+< HTTP/1.1 200 OK
+< Date: Thu, 01 Jan 1970 01:22:12 GMT
+< Server: App-webs/
+< Connection: close
+< Content-Length: 309
+< Content-Type: application/xml
+< 
+<?xml version="1.0" encoding="UTF-8"?>
+<ResponseStatus version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">
+<requestURL>/ISAPI/System/Video/inputs/channels/1/overlays/text/1</requestURL>
+<statusCode>1</statusCode>
+<statusString>OK</statusString>
+<subStatusCode>ok</subStatusCode>
+</ResponseStatus>
+* Closing connection 1
+floor up........65 368
+floor up........79 368
+floor up........93 368
+floor up........106 368
+floor up........120 368
+floor up........132 368
+floor up........143 368
+floor up........158 368
+floor up........173 368
+floor up........185 368
+floor up........198 368
+floor up........210 368
+floor up........223 368
+floor up........237 368
+floor up........254 368
+floor up........266 368
+floor up........281 368
+floor up........295 368
+floor up........310 368
+floor up........323 368
+floor up........339 368
+floor up........353 368
+floor up........366 368
+floor up........380 368
+floor++++++........
+-------------floor status update,floor=1,status=UP
+=======hk_ipc_str=======
+*   Trying 192.168.1.64...
+* TCP_NODELAY set
+* Connected to 192.168.1.64 (192.168.1.64) port 80 (#0)
+* Server auth using Digest with user 'admin'
+> PUT //ISAPI/System/Video/inputs/channels/1/overlays/text/1 HTTP/1.1
+Host: 192.168.1.64
+Accept: */*
+Content-Type:text/xml
+Content-Length: 0
+
+< HTTP/1.1 401 Unauthorized
+< Date: Thu, 01 Jan 1970 01:22:19 GMT
+< Server: App-webs/
+< Content-Length: 178
+< Content-Type: text/html
+< Connection: close
+< WWW-Authenticate: Digest qop="auth", realm="DS-2CD3335D-I", nonce="4d6a68444e4467774d446f30596a566d4d32513d", stale="FALSE"
+< WWW-Authenticate: Basic realm="DS-2CD3335D-I"
+< 
+* Closing connection 0
+* Issue another request to this URL: 'http://192.168.1.64//ISAPI/System/Video/inputs/channels/1/overlays/text/1'
+* Hostname 192.168.1.64 was found in DNS cache
+*   Trying 192.168.1.64...
+* TCP_NODELAY set
+* Connected to 192.168.1.64 (192.168.1.64) port 80 (#1)
+* Server auth using Digest with user 'admin'
+> PUT //ISAPI/System/Video/inputs/channels/1/overlays/text/1 HTTP/1.1
+Host: 192.168.1.64
+Authorization: Digest username="admin", realm="DS-2CD3335D-I", nonce="4d6a68444e4467774d446f30596a566d4d32513d", uri="//ISAPI/System/Video/inputs/channels/1/overlays/text/1", cnonce="NjQ4NGI0YjQyNzg1ZGRmOGM2Nzc1MjdjZDA3MjIzMWI=", nc=00000001, qop=auth, response="1f3320b42e02acf092f93868762f7369"
+Accept: */*
+Content-Type:text/xml
+Content-Length: 259
+
+send len=259
+* We are completely uploaded and fine
+< HTTP/1.1 200 OK
+< Date: Thu, 01 Jan 1970 01:22:19 GMT
+< Server: App-webs/
+< Connection: close
+< Content-Length: 309
+< Content-Type: application/xml
+< 
+<?xml version="1.0" encoding="UTF-8"?>
+<ResponseStatus version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">
+<requestURL>/ISAPI/System/Video/inputs/channels/1/overlays/text/1</requestURL>
+<statusCode>1</statusCode>
+<statusString>OK</statusString>
+<subStatusCode>ok</subStatusCode>
+</ResponseStatus>
+* Closing connection 1
+floor up........394 368
+floor++++++........
+-------------floor status update,floor=2,status=UP
+=======hk_ipc_str=======
+*   Trying 192.168.1.64...
+* TCP_NODELAY set
+* Connected to 192.168.1.64 (192.168.1.64) port 80 (#0)
+* Server auth using Digest with user 'admin'
+> PUT //ISAPI/System/Video/inputs/channels/1/overlays/text/1 HTTP/1.1
+Host: 192.168.1.64
+Accept: */*
+Content-Type:text/xml
+Content-Length: 0
+
+< HTTP/1.1 401 Unauthorized
+< Date: Thu, 01 Jan 1970 01:22:19 GMT
+< Server: App-webs/
+< Content-Length: 178
+< Content-Type: text/html
+< Connection: close
+< WWW-Authenticate: Digest qop="auth", realm="DS-2CD3335D-I", nonce="4d6a68444e4467774d446f30596a59774e544d3d", stale="FALSE"
+< WWW-Authenticate: Basic realm="DS-2CD3335D-I"
+< 
+* Closing connection 0
+* Issue another request to this URL: 'http://192.168.1.64//ISAPI/System/Video/inputs/channels/1/overlays/text/1'
+* Hostname 192.168.1.64 was found in DNS cache
+*   Trying 192.168.1.64...
+* TCP_NODELAY set
+* Connected to 192.168.1.64 (192.168.1.64) port 80 (#1)
+* Server auth using Digest with user 'admin'
+> PUT //ISAPI/System/Video/inputs/channels/1/overlays/text/1 HTTP/1.1
+Host: 192.168.1.64
+Authorization: Digest username="admin", realm="DS-2CD3335D-I", nonce="4d6a68444e4467774d446f30596a59774e544d3d", uri="//ISAPI/System/Video/inputs/channels/1/overlays/text/1", cnonce="ZjIyYTIwNjhiMGNkZDk0NTJjNjg5ZTBiN2ZlMDdmNDY=", nc=00000001, qop=auth, response="cf89f343125e5c9a547ec40cf7bb3e03"
+Accept: */*
+Content-Type:text/xml
+Content-Length: 261
+
+send len=261
+* We are completely uploaded and fine
+floor up........407 368
+floor++++++........
+-------------floor status update,floor=3,status=UP
+< HTTP/1.1 200 OK
+< Date: Thu, 01 Jan 1970 01:22:19 GMT
+< Server: App-webs/
+< Connection: close
+< Content-Length: 309
+< Content-Type: application/xml
+< 
+<?xml version="1.0" encoding="UTF-8"?>
+<ResponseStatus version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">
+<requestURL>/ISAPI/System/Video/inputs/channels/1/overlays/text/1</requestURL>
+<statusCode>1</statusCode>
+<statusString>OK</statusString>
+<subStatusCode>ok</subStatusCode>
+</ResponseStatus>
+* Closing connection 1
+floor up........415 368
+floor++++++........
+-------------floor status update,floor=4,status=UP
+=======hk_ipc_str=======
+*   Trying 192.168.1.64...
+* TCP_NODELAY set
+* Connected to 192.168.1.64 (192.168.1.64) port 80 (#0)
+* Server auth using Digest with user 'admin'
+> PUT //ISAPI/System/Video/inputs/channels/1/overlays/text/1 HTTP/1.1
+Host: 192.168.1.64
+Accept: */*
+Content-Type:text/xml
+Content-Length: 0
+
+< HTTP/1.1 401 Unauthorized
+< Date: Thu, 01 Jan 1970 01:22:19 GMT
+< Server: App-webs/
+< Content-Length: 178
+< Content-Type: text/html
+< Connection: close
+< WWW-Authenticate: Digest qop="auth", realm="DS-2CD3335D-I", nonce="4e6b5a464f4556464e5549364e4749324d6a5577", stale="FALSE"
+< WWW-Authenticate: Basic realm="DS-2CD3335D-I"
+< 
+* Closing connection 0
+* Issue another request to this URL: 'http://192.168.1.64//ISAPI/System/Video/inputs/channels/1/overlays/text/1'
+* Hostname 192.168.1.64 was found in DNS cache
+*   Trying 192.168.1.64...
+* TCP_NODELAY set
+* Connected to 192.168.1.64 (192.168.1.64) port 80 (#1)
+* Server auth using Digest with user 'admin'
+> PUT //ISAPI/System/Video/inputs/channels/1/overlays/text/1 HTTP/1.1
+Host: 192.168.1.64
+Authorization: Digest username="admin", realm="DS-2CD3335D-I", nonce="4e6b5a464f4556464e5549364e4749324d6a5577", uri="//ISAPI/System/Video/inputs/channels/1/overlays/text/1", cnonce="ZTUyMjRjZTZkNjUyOTU2NmM5YzRhYTQzY2I5YjliY2I=", nc=00000001, qop=auth, response="a5a9671bb898028c6988eef6bc5eda6d"
+Accept: */*
+Content-Type:text/xml
+Content-Length: 261
+
+send len=261
+* We are completely uploaded and fine
+moving end,moving distance = 415cm
+change status...........
+floor up........415 368
+floor++++++........
+-------------floor status update,floor=5,status=UP
+< HTTP/1.1 200 OK
+< Date: Thu, 01 Jan 1970 01:22:20 GMT
+< Server: App-webs/
+< Connection: close
+< Content-Length: 309
+< Content-Type: application/xml
+< 
+<?xml version="1.0" encoding="UTF-8"?>
+<ResponseStatus version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">
+<requestURL>/ISAPI/System/Video/inputs/channels/1/overlays/text/1</requestURL>
+<statusCode>1</statusCode>
+<statusString>OK</statusString>
+<subStatusCode>ok</subStatusCode>
+</ResponseStatus>
+* Closing connection 1
+start moving...........
+change status...........
+floor up........5 368
+floor up........11 368
+moving end,moving distance = 11cm
+change status...........
+floor up........11 368
+floor up........11 368
+floor++........
+move_distance=0........
+-------------floor status update,floor=5,status=PAUSE
+=======hk_ipc_str=======
+*   Trying 192.168.1.64...
+* TCP_NODELAY set
+* Connected to 192.168.1.64 (192.168.1.64) port 80 (#0)
+* Server auth using Digest with user 'admin'
+> PUT //ISAPI/System/Video/inputs/channels/1/overlays/text/1 HTTP/1.1
+Host: 192.168.1.64
+Accept: */*
+Content-Type:text/xml
+Content-Length: 0
+
+< HTTP/1.1 401 Unauthorized
+< Date: Thu, 01 Jan 1970 01:22:21 GMT
+< Server: App-webs/
+< Content-Length: 178
+< Content-Type: text/html
+< Connection: close
+< WWW-Authenticate: Digest qop="auth", realm="DS-2CD3335D-I", nonce="4e55557a517a6c424e6a41364e4749324f446c6d", stale="FALSE"
+< WWW-Authenticate: Basic realm="DS-2CD3335D-I"
+< 
+* Closing connection 0
+* Issue another request to this URL: 'http://192.168.1.64//ISAPI/System/Video/inputs/channels/1/overlays/text/1'
+* Hostname 192.168.1.64 was found in DNS cache
+*   Trying 192.168.1.64...
+* TCP_NODELAY set
+* Connected to 192.168.1.64 (192.168.1.64) port 80 (#1)
+* Server auth using Digest with user 'admin'
+> PUT //ISAPI/System/Video/inputs/channels/1/overlays/text/1 HTTP/1.1
+Host: 192.168.1.64
+Authorization: Digest username="admin", realm="DS-2CD3335D-I", nonce="4e55557a517a6c424e6a41364e4749324f446c6d", uri="//ISAPI/System/Video/inputs/channels/1/overlays/text/1", cnonce="YjE0MjM4MWIwM2ExMTFkNzRmNjI3NmYwOTEyODc3ODY=", nc=00000001, qop=auth, response="80673194027466fe14d35d0337d75c38"
+Accept: */*
+Content-Type:text/xml
+Content-Length: 259
+
+send len=259
+* We are completely uploaded and fine
+move_distance=0........
+< HTTP/1.1 200 OK
+< Date: Thu, 01 Jan 1970 01:22:21 GMT
+< Server: App-webs/
+< Connection: close
+< Content-Length: 309
+< Content-Type: application/xml
+< 
+<?xml version="1.0" encoding="UTF-8"?>
+<ResponseStatus version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">
+<requestURL>/ISAPI/System/Video/inputs/channels/1/overlays/text/1</requestURL>
+<statusCode>1</statusCode>
+<statusString>OK</statusString>
+<subStatusCode>ok</subStatusCode>
+</ResponseStatus>
+* Closing connection 1
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+start moving...........
+change status...........
+floor++........
+moving end,moving distance = 5cm
+change status...........
+floor++........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+start moving...........
+change status...........
+floor++........
+floor++........
+moving end,moving distance = 3cm
+change status...........
+floor++........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+move_distance=0........
+^C

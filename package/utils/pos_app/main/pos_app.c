@@ -5,6 +5,7 @@
 #include <pthread.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <math.h>
 
 #include "shmdata.h"
 #include "conf_op.h"
@@ -119,7 +120,7 @@ void *read_key_thread(void) {
 }
 
 #ifdef SUPPORT_HP303S
-#define ALLOW_DIFF 50	//cm
+#define ALLOW_DIFF 100	//cm
 enum Status {
 	MOVE_STOP = 1,
 	MOVE_UP,
@@ -132,13 +133,38 @@ struct MoveStatus {
 	uint16_t keep_status;
 	int32_t move_distance;
 	int32_t current_altitu;
+	int32_t total_altitu;
 	struct Show {
 		uint8_t show_update;
 		uint8_t show_status;
 		uint8_t show_floor;
 	}mShow;
 };
+int it_is_first_floor(void)
+{
+	if(floor_conf->floorBelow > 0) {
+		if(floor_conf->currentFloor == 1)
+			return 1;
+	}else {
+		if(abs(floor_conf->currentFloor) == floor_conf->floorBelow)
+			return 1;
+	}
+
+	return -1;
+}
+int it_is_last_floor(void)
+{
+	if(floor_conf->currentFloor >= floor_conf->floorAbove)
+		return 1;
+	return -1;
+}
+int it_is_in_exception(void)
+{
+
+	return -1;
+}
 struct MoveStatus mMoveStatus = {MOVE_STOP,0,0};
+int move_distance = 0;
 void get_altitu_and_calc(void)
 {
 	int i = 0;
@@ -147,7 +173,7 @@ void get_altitu_and_calc(void)
 	float average = 0;
 	static float altitu_prev = 0;
 	static uint8_t moving = 0;
-	static float move_distance = 0;
+	
 	for(i=0;i<5;i++)
 	{
 		HP303_read(0.05,&press,&altitu,&temp);
@@ -156,21 +182,29 @@ void get_altitu_and_calc(void)
 	}
 	average = altitu_sum/5;//m
 	mMoveStatus.current_altitu = average;
-	printf("average altitu = %dcm\n",(int)(average*100));
+	//printf("average altitu = %dcm\n",(int)(average*100));
 	if(fabs(average - altitu_prev) >= 0.05) {
 		if(moving != 1) 
+		{
+			printf("start moving...........\n");
 			moving = 1;
-		move_distance += average - altitu_prev;
-		mMoveStatus.move_distance = (int32_t)(move_distance*100);
+		}
+		move_distance += (average - altitu_prev)*100;//m -> cm
+		mMoveStatus.move_distance = move_distance;
+		mMoveStatus.total_altitu += (average - altitu_prev)*100;//real altitu
+		if(mMoveStatus.total_altitu < 0)
+			mMoveStatus.total_altitu = 0;
+		else if(mMoveStatus.total_altitu > floor_conf->floorAltituTotal)
+			mMoveStatus.total_altitu = floor_conf->floorAltituTotal;
 		if(move_distance > 0)
 			mMoveStatus.status = MOVE_UP;
 		else
 			mMoveStatus.status = MOVE_DOWN;
 	}else {
 		if(moving == 1) {
-			printf("moving end,moving distance = %dcm\n",(int)(move_distance*100));
+			printf("moving end,moving distance = %dcm\n",move_distance);
 			moving = 0;		
-			mMoveStatus.move_distance = (int32_t)(move_distance*100);
+			mMoveStatus.move_distance = move_distance;
 			move_distance = 0;
 			mMoveStatus.status = MOVE_STOP;
 		}
@@ -179,11 +213,13 @@ void get_altitu_and_calc(void)
 }
 int get_floor_by_altitu(void)
 {
+	float float_floor = 0;
 	get_altitu_and_calc();
 		//printf("hp303 get data,altitu = %dcm\n",(int)altitu*100);
 	//1.get move status
 	if(mMoveStatus.status != mMoveStatus.last_status)
 	{
+		printf("change status...........\n");
 		mMoveStatus.keep_status = 0;
 		mMoveStatus.last_status = mMoveStatus.status;
 	}
@@ -207,40 +243,73 @@ int get_floor_by_altitu(void)
 	//2.calc floor
 	if(floor_conf->useAltitu == 1)
 	{
-		//
-		if(floor_conf->floorStatus == PAUSE)
+#if 0
+		if((floor_conf->floorStatus == PAUSE) || (mMoveStatus.status == MOVE_STOP))
 		{
 			if(mMoveStatus.move_distance > 0)
 			{
 				if((mMoveStatus.move_distance > (floor_conf->floorAltitu - ALLOW_DIFF)) && (mMoveStatus.move_distance < (floor_conf->floorAltitu + ALLOW_DIFF)))
 					floor_conf->currentFloor++;
+				printf("floor++........\n");
 			}
 			else if(mMoveStatus.move_distance < 0)
 			{
 				if((mMoveStatus.move_distance > (-floor_conf->floorAltitu - ALLOW_DIFF)) && (mMoveStatus.move_distance < (-floor_conf->floorAltitu + ALLOW_DIFF)))
 					floor_conf->currentFloor--;
+				printf("floor--........\n");
 			}
 			if(mMoveStatus.status == MOVE_STOP)
+			{
+				printf("move_distance=0........\n");
 				mMoveStatus.move_distance = 0;
+				move_distance = 0;
+			}
 		}
 		else if(floor_conf->floorStatus == UP)
 		{
+			printf("floor up........%d %d\n",mMoveStatus.move_distance,floor_conf->floorAltitu);
 			//normal
 			if(mMoveStatus.move_distance >= floor_conf->floorAltitu)
 			{
+				printf("floor++++++........\n");
 				floor_conf->currentFloor++;
+				move_distance -= floor_conf->floorAltitu;
 				mMoveStatus.move_distance -= floor_conf->floorAltitu;
 			}
 		}
 		else if(floor_conf->floorStatus == DOWN)
 		{
+			printf("floor down........%d\n",mMoveStatus.move_distance);
 			if(abs(mMoveStatus.move_distance) >= floor_conf->floorAltitu)
 			{
 				floor_conf->currentFloor--;
+				move_distance += floor_conf->floorAltitu;
 				mMoveStatus.move_distance += floor_conf->floorAltitu;
 			}
 		}
+#else
+		floor_conf->currentAltitu = mMoveStatus.total_altitu;
+		if(PAUSE == floor_conf->floorStatus)
+			float_floor = (float)mMoveStatus.total_altitu / (float)floor_conf->floorAltitu + 0.3 - floor_conf->floorBelow + 1;
+			//floor_conf->currentFloor = floor((mMoveStatus.total_altitu * 13) / (10 *floor_conf->floorAltitu)) - floor_conf->floorBelow + 1;
+		else if(UP == floor_conf->floorStatus)
+			float_floor = (float)mMoveStatus.total_altitu / (float)floor_conf->floorAltitu - floor_conf->floorBelow + 1;
+			//floor_conf->currentFloor = floor(mMoveStatus.total_altitu / floor_conf->floorAltitu) - floor_conf->floorBelow + 1;
+		else if(DOWN == floor_conf->floorStatus)
+			float_floor = (float)mMoveStatus.total_altitu / (float)floor_conf->floorAltitu + 0.8 - floor_conf->floorBelow + 1;
+		floor_conf->currentFloor = (int)float_floor;
+		if(PAUSE == floor_conf->floorStatus) {
+			if(it_is_first_floor() > 0)
+				mMoveStatus.total_altitu = 0;
+			if(it_is_last_floor() > 0)
+				mMoveStatus.total_altitu = floor_conf->floorAltituTotal;
+			if(it_is_in_exception() > 0)
+				floor_conf->floorStatus = EXCEPTION;
+		}
+		pos_debug("state=%s,floor_altitu=%d,current_altitu=%d,float_floor=%f,floor=%d",
+			status_to_string(floor_conf->floorStatus),floor_conf->floorAltitu,mMoveStatus.total_altitu,float_floor,floor_conf->currentFloor);
 	}
+#endif
 	return floor_conf->currentFloor;
 }
 void *read_hp303s_thread(void) {
@@ -262,6 +331,7 @@ void *read_hp303s_thread(void) {
 		//获取当前楼层
 		floor_conf->currentFloor = get_floor_by_altitu();
 		if((floor_conf->currentFloor != floor_conf->lastFloor) || (floor_conf->floorStatus != floor_conf->lastFloorStatus)) {
+			floor_conf->dataUpdate = 1;
 			//判断电梯层数是否在设置范围内,如果是才更新楼层显示
 			if(floor_conf->currentFloor < 0) {
 				if(abs(floor_conf->currentFloor) <= floor_conf->floorBelow) {				
@@ -283,7 +353,7 @@ void *read_hp303s_thread(void) {
 			floor_conf->lastFloorStatus = floor_conf->floorStatus;
 			printf("-------------floor status update,floor=%d,status=%s\n",floor_conf->currentFloor,status_to_string(floor_conf->floorStatus));
 		}
-		usleep(100*1000);
+		usleep(300*1000);
 	}
 }
 #endif
@@ -331,6 +401,9 @@ int main()
 			if(ipc_conf->floorEnable == 1) {
 				//解析并更新配置
 				parse_floor_conf();
+#ifdef SUPPORT_HP303S
+				mMoveStatus.total_altitu = (floor_conf->startFloor + floor_conf->floorBelow - 1) * floor_conf->floorAltitu;
+#endif
 				//设置底层楼层计数
 				//set_int_count(floor_conf->currentFloor);
 				//清除显示

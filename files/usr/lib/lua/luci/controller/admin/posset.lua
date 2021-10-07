@@ -33,14 +33,17 @@ function action_calc_average()
 	local sencond_n = tonumber(second)
 	local average
 	local a1,a2
+	local total
 	if floor_below>0 or floor_above>0 then
-		local a1,a2 = math.modf((sencond_n - first_n) / (floor_below + floor_above))
+		local a1,a2 = math.modf((sencond_n - first_n) / (floor_below + floor_above - 1))
+		total = sencond_n - first_n
 		--a1 = (sencond_n - first_n) / (floor_below + floor_above)
 		average = tostring(a1)
 		
 	else
 		average = tostring(0)
 	end
+	luci.sys.exec("uci set floorset.altitu.total=%d" % total)
 	luci.sys.exec("uci set floorset.altitu.average=%d" % average)
 	luci.sys.exec("uci commit")
 	if floor_below==0 and floor_above==0 then
