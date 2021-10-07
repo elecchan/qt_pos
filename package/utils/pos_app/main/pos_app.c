@@ -142,7 +142,7 @@ struct MoveStatus {
 };
 int it_is_first_floor(void)
 {
-	if(floor_conf->floorBelow > 0) {
+	if(floor_conf->floorBelow == 0) {
 		if(floor_conf->currentFloor == 1)
 			return 1;
 	}else {

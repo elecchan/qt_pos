@@ -32,7 +32,7 @@ function index()
 
 	-- Empty services menu to be populated by addons
 	entry({"admin", "louxianset"}, firstchild(), _("楼显设置"), 40).index = true
-	entry({"admin", "posset"}, firstchild(), _("POS机设置"), 50).index = true
+	--entry({"admin", "posset"}, firstchild(), _("POS机设置"), 50).index = true
 	entry({"admin", "systemset"}, firstchild(), _("系统设置"), 60).index = true
 	entry({"admin", "help"}, firstchild(), _("help"), 70).index = true
 
