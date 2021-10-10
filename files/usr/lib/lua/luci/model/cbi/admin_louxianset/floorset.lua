@@ -135,7 +135,7 @@ f:value(99,translate("99"))
 local nodisp = s:taboption("floor_set", Value, "nodisp",translate("掠过楼层"),translate("楼层数之间以半角逗号隔开"))
 local yue = s:taboption("floor_set", Value, "rename",translate("地上地下楼层的显示名称"),translate("默认显示是楼层数后带'F',可自定义显示"))
 local change = s:taboption("floor_set", Value, "change",translate("改名楼层"),translate("示例:\"-4:D,14:1D\",楼层与改名之间要以半角冒号':'隔开,负楼层用'-'表示, 一定要以半角逗号','结束,最多只能改名10层楼"))
-local high = s:taboption("floor_set", Value, "high",translate("特殊层高"),translate("示例:\"1:380,2:350\",层高单位cm,层高之间要以半角冒号':'隔开,负楼层用'-'表示, 一定要以半角逗号','结束,最多只能改名10层楼"))
+--local high = s:taboption("floor_set", Value, "high",translate("特殊层高"),translate("示例:\"1:380,2:350\",层高单位cm,层高之间要以半角冒号':'隔开,负楼层用'-'表示, 一定要以半角逗号','结束,最多只能改名10层楼"))
 
 --altitu set
 --al = m:section(NamedSection, "altitu")
@@ -153,6 +153,8 @@ average.template = "admin_louxianset/get_average"
 --local list = s:taboption("altitu_set",ListValue,"above",translate("地面层数"), translate("楼层数包含不显示楼层/跃层/改名楼层"))
 --list:value(0,translate("0"))
 --list:value(1,translate("1"))
+local table = s:taboption("altitu_set", DummyValue,"altitu_t")
+table.template = "admin_louxianset/show_floor"
 
 function m.on_commit(map)
 	luci.sys.call("/usr/bin/ipc_conf")

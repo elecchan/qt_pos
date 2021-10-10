@@ -1,0 +1,34 @@
+<%+cbi/valueheader%>
+<script type="text/javascript">//<![CDATA[
+function show_mess()
+{
+	XHR.get('<%=luci.dispatcher.build_url("admin", "louxianset", "get_floor_mess")%>',null,
+			function(x, rv)
+		{
+			var s = document.getElementById('<%=self.option%>-result-status');
+			if (s)
+			{
+				var val = 
+				"<tr>\
+					<th>地上楼层高度(cm)</th>\
+        			<th>地下楼层高度(cm)</th>";
+    			var val2 = val + rv.floor_mess + "</tr>";
+				s.innerHTML = val2;
+			}
+			
+		}
+		);
+}
+//]]></script>
+<html>
+<body>
+<table id="<%=self.option%>-result-status" border="1" style="border-collapse: collapse;">
+    <script type="text/javascript">//<![CDATA[
+		setInterval(show_mess, 1000);
+//]]></script>
+    
+</table>
+</body>
+</html>
+<%+cbi/valuefooter%>
+
