@@ -5,17 +5,14 @@
 
 	function get_average(btn)
 	{
+		var get_list = document.getElementById('<%=self.option%>-floorSelectList');
+		var get_list_index = get_list.selectedIndex;
+		var get_list_val = get_list.options[get_list_index].value;
 		btn.disabled = true;
 		btn.value    = '<%:获取中...%>';
 
-		XHR.get('<%=luci.dispatcher.build_url("admin", "louxianset", "calc_average")%>',null,
-			function(x, rv)
+		new XHR().post('<%=luci.dispatcher.build_url("admin", "louxianset", "calc_average")%>',{index:get_list_index},function(rv)
 		{
-			var s = document.getElementById('<%=self.option%>-result-average');
-			if (s)
-			{
-				s.innerHTML = rv.floor_average || '?';
-			}
 			btn.disabled = false;
 			btn.value    = '<%:获取数据%>';
 		}
@@ -24,8 +21,26 @@
 
 		return false;
 	}
-//]]></script>
 
+	function get_floor_list()
+	{
+		XHR.get('<%=luci.dispatcher.build_url("admin", "louxianset", "get_floor_list")%>',null,
+			function(x, rv)
+		{
+			var s = document.getElementById('<%=self.option%>-floorSelectList');
+			if (s)
+			{
+				s.innerHTML = rv.floor_list;
+			}
+		}
+		);
+	}
+//]]></script>
+<select name="selectList" id="<%=self.option%>-floorSelectList">
+  <script type="text/javascript">//<![CDATA[
+		get_floor_list();
+//]]></script>
+</select>
 <span id="<%=self.option%>-result-average"></span>
 <input type="button" class="cbi-button cbi-button-apply" value="<%:获取数据%>" onclick="return get_average(this)" />
 
