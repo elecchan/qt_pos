@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/shm.h>
+#include <string.h>
 
 #include "shmdata.h"
 #include "conf_op.h"

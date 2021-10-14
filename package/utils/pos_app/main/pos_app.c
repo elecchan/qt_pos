@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <math.h>
+#include <string.h>
 
 #include "shmdata.h"
 #include "conf_op.h"
