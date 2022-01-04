@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/shm.h>
+#include <string.h>
 
 #include "shmdata.h"
 #include "conf_op.h"
@@ -175,6 +176,8 @@ int parse_floor_conf(void)
 		floor_conf->useAltitu = 0;
 	else
 		floor_conf->useAltitu = 1;
+	uci_get(get_floor_total,retMsg,sizeof(retMsg));
+	floor_conf->floorAltituTotal = atoi(retMsg);
 	printf("--------get average altitu=%d,flag=%d\n",floor_conf->floorAltitu,floor_conf->useAltitu);
 #endif
 	while(atoi(ptr) != 0) {
@@ -215,7 +218,7 @@ int parse_floor_conf(void)
 		i++;
 	}
 	*/
-	memset(floor_conf->changeName,0,sizeof(floor_conf->changeName));
+	memset(floor_conf->changeName,0,10*sizeof(ChangeFloor));
 	uci_get(get_floor_change,temp,sizeof(temp));
 	ptr = temp;
 	i = 0;
@@ -282,7 +285,7 @@ int it_is_disp_floor(int floor) {
 //否:返回-1
 int it_is_change_name(int floor) {
 	int i;
-	for(i=0;i<50;i++) {
+	for(i=0;i<10;i++) {
 		if(floor == floor_conf->changeName[i].number)
 			return i;
 	}

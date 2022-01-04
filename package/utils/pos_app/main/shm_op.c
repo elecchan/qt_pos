@@ -5,8 +5,9 @@
 
 #include "shmdata.h"
 #include "shm_op.h"
+#include "config.h"
 
-#define Debug 1
+//#define Debug 1
 
 //分配的共享内存的原始首地址
 void *shm_ipc = NULL;

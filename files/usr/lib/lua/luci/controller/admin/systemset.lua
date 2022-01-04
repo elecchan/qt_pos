@@ -102,7 +102,8 @@ function action_flashops()
 					checksum = image_checksum(),
 					storage  = storage_size(),
 					size     = (fs.stat(image_tmp, "size") or 0),
-					keep     = (not not luci.http.formvalue("keep"))
+					--keep     = (not not luci.http.formvalue("keep"))
+					keep     = true
 				})
 			else
 				fs.unlink(image_tmp)
@@ -116,7 +117,8 @@ function action_flashops()
 		-- Start sysupgrade flash
 		--
 		elseif step == 2 then
-			local keep = (luci.http.formvalue("keep") == "1") and "" or "-n"
+			--local keep = (luci.http.formvalue("keep") == "1") and "" or "-n"
+			local keep     = ""
 			luci.template.render("admin_systemset/applyreboot", {
 				title = luci.i18n.translate("Flashing..."),
 				msg   = luci.i18n.translate("The system is flashing now.<br /> DO NOT POWER OFF THE DEVICE!<br /> Wait a few minutes before you try to reconnect. It might be necessary to renew the address of your computer to reach the device again, depending on your settings."),

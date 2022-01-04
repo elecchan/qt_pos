@@ -62,8 +62,10 @@ struct shared_floor_conf
 	char reName[100];
 #ifdef SUPPORT_HP303S
 	int floorAltitu;
+	int floorAltituTotal;
 	int useAltitu;
 	int diffFloorAltituCnt;
+	int currentAltitu;
 	struct DiffFloorAltitu {
 		int floor;
 		int altitu;

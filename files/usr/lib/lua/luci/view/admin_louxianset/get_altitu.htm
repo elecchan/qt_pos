@@ -8,13 +8,13 @@
 		btn.disabled = true;
 		btn.value    = '<%:获取中...%>';
 
-		XHR.get('<%=luci.dispatcher.build_url("admin", "louxianset", "get_altitu")%>',null,
+		XHR.get('<%=luci.dispatcher.build_url("admin", "louxianset", "get_altitu_start")%>',null,
 			function(x, rv)
 		{
 			var s = document.getElementById('<%=self.option%>-result-status');
 			if (s)
 			{
-				s.innerHTML = rv.timestring || '?';
+				s.innerHTML = rv.altitu_start || '?';
 			}
 			btn.disabled = false;
 			btn.value    = '<%:获取数据%>';

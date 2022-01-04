@@ -7,4 +7,5 @@ config floorpara altitu
 	option second 0
 	option average 0
 	option standar 0
+	option total 0
         
