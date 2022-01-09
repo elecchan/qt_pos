@@ -62,7 +62,7 @@ int parse_ipc_conf(void)
 		strcpy(ipc_conf->productName ,"hikvision");	
 		break;
 		case 2:
-		strcpy(ipc_conf->productName ,"dahua");	
+		strcpy(ipc_conf->productName ,"dahuaview");	
 		break;
 		case 3:
 		strcpy(ipc_conf->productName ,"xiongmai");	
@@ -143,6 +143,120 @@ void strcat_from_2str(char *dest,char *src1,char *src2) {
         cmp_str[i] = tmp1[len3+i];
     }
 }
+#ifdef SUPPORT_HP303S
+#define MAX_FLOOR 100
+int floor_altitu_tables[MAX_FLOOR][2];
+int floor_cnt = 0;
+void parse_floor_altitu(void)
+{
+	int i = 0,j = 0,f = 1;
+	char tmp[100],tmp2[100];
+	int altitu_sum = 0;
+	int floor_below = floor_conf->floorBelow;
+	int floor_above = floor_conf->floorAbove - 1;
+	floor_cnt = floor_below + floor_above;
+	if(floor_conf->floorBelow > 0)
+	{
+		f = -floor_below;
+		do
+		{
+			sprintf(tmp,"uci get floorset.altitu.floorB%d",-f);
+			uci_get(tmp,retMsg,sizeof(retMsg));
+			altitu_sum += atoi(retMsg);
+			floor_altitu_tables[i][0] = altitu_sum;
+			floor_altitu_tables[i][1] = f;
+			floor_below--;
+			i++;
+			f++;
+		}while(f < 0);
+	}
+	if(floor_conf->floorAbove > 0)
+	{
+		//altitu_sum = 0;
+		f = 1;
+		do
+		{
+			sprintf(tmp,"uci get floorset.altitu.floorA%d",f);
+			uci_get(tmp,retMsg,sizeof(retMsg));
+			altitu_sum += atoi(retMsg);
+			floor_altitu_tables[i][0] = altitu_sum;
+			floor_altitu_tables[i][1] = f;
+			f++;
+			i++;
+		}while(f <= floor_above);
+	}
+	printf("==================================floor mess===================================\n");
+	for(j=0;j<floor_cnt;j++)
+		printf("floor %d,altitu %d\n",floor_altitu_tables[j][1],floor_altitu_tables[j][0]);
+	printf("==================================floor mess end===================================\n");
+}
+int get_floor_by_altitu_bables(int altitu,int diff,int state)
+{
+	int i = 0;
+
+	switch(state)
+	{
+		case UP:
+			for(i=0;i<floor_cnt;i++) {
+				if(altitu < floor_altitu_tables[i][0])
+					break;
+			}
+			if(i == floor_cnt)
+				i--;
+			return floor_altitu_tables[i][1];
+			break;
+		case DOWN:
+			for(i=0;i<floor_cnt;i++) {
+				if(altitu < floor_altitu_tables[i][0])
+					break;
+			}
+			if(i == floor_cnt)
+				return floor_altitu_tables[i-1][1];
+			else if(i == (floor_cnt - 1))
+				return floor_altitu_tables[i][1];
+			else
+				return floor_altitu_tables[i+1][1];
+			break;
+		case PAUSE:
+			//altitu += diff;
+			for(i=0;i<floor_cnt;i++) {
+				if(altitu < floor_altitu_tables[i][0])
+					break;
+			}
+			if(i == floor_cnt) {
+				return floor_altitu_tables[i-1][1] + 1;
+			}
+			else if(i == 0) {
+				if((altitu - 0) > (floor_altitu_tables[i][0] - altitu))
+					return floor_altitu_tables[i][1] + 1;
+				else
+					return floor_altitu_tables[i][1];
+			}
+			else {
+				//return floor_altitu_tables[i][1];
+				if((altitu - floor_altitu_tables[i-1][0]) > (floor_altitu_tables[i][0] - altitu))
+					return floor_altitu_tables[i][1] + 1;
+				else
+					return floor_altitu_tables[i][1];
+			}
+			break;
+		default:break;
+	}
+	return 0;
+}
+int get_altitu_by_floor_tables(int floor)
+{
+	int i = 0;
+	if(floor == 1)
+		floor = -1;
+	else
+		floor--;
+	for(i=0;i<floor_cnt;i++)
+		if(floor_altitu_tables[i][1] == floor)
+			return floor_altitu_tables[i][0];
+	return 0;
+}
+#endif
 int parse_floor_conf(void)
 {
 	//获取正负楼层数
@@ -179,6 +293,7 @@ int parse_floor_conf(void)
 	uci_get(get_floor_total,retMsg,sizeof(retMsg));
 	floor_conf->floorAltituTotal = atoi(retMsg);
 	printf("--------get average altitu=%d,flag=%d\n",floor_conf->floorAltitu,floor_conf->useAltitu);
+	parse_floor_altitu();
 #endif
 	while(atoi(ptr) != 0) {
 		if(atoi(ptr) < -9) {
@@ -218,7 +333,7 @@ int parse_floor_conf(void)
 		i++;
 	}
 	*/
-	memset(floor_conf->changeName,0,10*sizeof(ChangeFloor));
+	memset(floor_conf->changeName,0,50*sizeof(ChangeFloor));
 	uci_get(get_floor_change,temp,sizeof(temp));
 	ptr = temp;
 	i = 0;
@@ -249,7 +364,7 @@ int parse_floor_conf(void)
 			ptr = ptr + strlen(floor_conf->changeName[i].name) + 2;
 		}	
 		i++;
-		if(i >= 10)
+		if(i >= 50)
 			break;
 	}
 	

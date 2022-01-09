@@ -34,6 +34,9 @@ static int uni_ipc_str(char *disp,int x,int y,int id,int disp_floor);
 static int uni_pos_str(char *inbuf,int line,int delay);
 static int uni_ipc_test(char *disp,int x,int y,int id,int disp_floor);
 
+static int dahua_ipc_str(char *disp,int x,int y,int id,int disp_floor);
+static int dahua_pos_str(char *inbuf,int line,int delay);
+
 char hkAddStr[1024] = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n\
 <TextOverlay version=\"2.0\" xmlns=\"http://www.hikvision.com/ver20/XMLSchema\">\r\n";
 
@@ -44,6 +47,8 @@ IpcFmt ipcFmt[] = {
 	{"hikvision", "DS-2CC52D5S-IT3",  4, hk_ipc_str},
 	{"uniview",   "Default",    	  4, uni_ipc_str},
 	{"uniview",   "IPC-S322-IR",      4, uni_ipc_str},
+	{"dahuaview", "Default",    	  1, dahua_ipc_str},
+	{"dahuaview", "IPC-HD2100P",      1, dahua_ipc_str},	
 };
 
 PosFmt posFmt[] = {
@@ -53,6 +58,8 @@ PosFmt posFmt[] = {
 	{"hikvision", "DS-2CC52D5S-IT3",  4, hk_pos_str},
 	{"uniview",   "Default",    	  4, uni_pos_str},
 	{"uniview",   "IPC-S322-IR",      4, uni_pos_str},
+	{"dahuaview", "Default",    	  1, dahua_pos_str},
+	{"dahuaview", "IPC-HD2100P",      1, dahua_pos_str},	
 };
 
 int findIpcVersionIndex(void)
@@ -303,7 +310,7 @@ static int hk_ipc_str(char *disp,int x,int y,int id,int disp_floor) {
 			if(floor_conf->floorStatus == EXCEPTION)
 				strcat(strtemp,exception_utf8);
 			strcat(diejiastr,strtemp);
-#if 1
+#if 0
 			sprintf(strtemp,"(%d",floor_conf->floorAltitu);
             strcat(diejiastr,strtemp);
             sprintf(strtemp,":%d",floor_conf->currentAltitu);
@@ -736,4 +743,128 @@ static int uni_pos_str(char *inbuf,int line,int delay) {
 	}
     hk_pos_err:
     return 0;
+}
+
+int dahua_send(char *u,char *p,char *ip,char *str)
+{
+    int i;
+	CURL *curl;  
+    CURLcode res;  
+    
+    char url[1024]; 
+	memset(url,0,sizeof(url));
+
+      
+	//设置显示通道
+	sprintf(url,"%s/cgi-bin/configManager.cgi?action=setConfig&VideoWidget[0].CustomTitle[1].EncodeBlend=true&VideoWidget[0].CustomTitle[1].PreviewBlend=true&VideoWidget[0].CustomTitle[1].Rect[0]=%d&VideoWidget[0].CustomTitle[1].Rect[1]=%d&VideoWidget[0].CustomTitle[1].Rect[2]=%d&VideoWidget[0].CustomTitle[1].Rect[3]=%d&VideoWidget[0].CustomTitle[1].Text=",ip,ipc_conf->xPosition,ipc_conf->yPosition,ipc_conf->xPosition,ipc_conf->yPosition);
+	
+	strcat(url,str);
+	
+    curl_global_init(CURL_GLOBAL_ALL);  
+    curl = curl_easy_init();  
+
+	curl_easy_setopt(curl, CURLOPT_USERNAME, u);
+	curl_easy_setopt(curl, CURLOPT_PASSWORD, p);
+
+	curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST|CURLAUTH_BASIC);
+
+    if (curl) {  
+ 
+    curl_easy_setopt(curl, CURLOPT_URL, url); 
+  
+    res = curl_easy_perform(curl);  
+    //打印时间
+
+
+    if (res != CURLE_OK)  
+        fprintf(stderr, "set failed: %s\n",curl_easy_strerror(res));        
+        curl_easy_cleanup(curl);  
+    } 
+    
+    curl_global_cleanup();    
+
+	return 0;
+}
+
+
+static int dahua_ipc_str(char *disp,int x,int y,int id,int disp_floor) {
+	printf("=======dahua_ipc_str=======,%s\n",disp);
+	int len = 0;
+	int i = 0;
+    char str1[1024]; 
+	char strtemp[1024];
+
+	memset(str1,'\0',1024);
+	memset(strtemp,'\0',1024);
+
+	strcat(str1,disp);//拷贝显示内容
+	if(strlen(str1) > 0) {
+		//printf("lllllllllllllllllllllllllllllllllllllllllll\n");
+		strcat(str1,":");
+	}
+	//获取电梯楼层信息
+	if(disp_floor == 1) {
+		//总的楼层数大于0才显示
+		if(floor_conf->floorCount > 0) { 
+			//memset(strtemp,0,sizeof(strtemp));
+            //判断是否是不显示楼层
+            if(!it_is_disp_floor(floor_conf->currentFloor)) {
+                //判断是否重命名
+                if((i = it_is_change_name(floor_conf->currentFloor)) != -1) {
+                    //sprintf(strtemp,":");
+                    strcat(strtemp,floor_conf->changeName[i].name);
+                }else {
+                	//判断是否统一改名
+                	if(floor_conf->reName[0] != 0) {
+                		sprintf(strtemp,"%d",floor_conf->currentFloor);
+                		strcat(strtemp,floor_conf->reName);
+                	}else
+			       		sprintf(strtemp,"%dF",floor_conf->currentFloor);
+                }
+                floor_conf->dispLastFloor = floor_conf->currentFloor;
+            }else {
+            	//如果是不显示楼层就显示上次有显示的楼层
+            	//如果是不显示楼层是当前楼层则先刷新显示开始楼层
+            	if(floor_conf->dispLastFloor == 0) {
+            		//判断是否统一改名
+                	if(floor_conf->reName[0] != 0) {
+                		sprintf(strtemp,"%d",floor_conf->startFloor);
+                		strcat(strtemp,floor_conf->reName);
+                	}else
+			       		sprintf(strtemp,"%dF",floor_conf->startFloor);
+            	}else if((i = it_is_change_name(floor_conf->dispLastFloor)) != -1) {
+                   // sprintf(strtemp,":");
+                    strcat(strtemp,floor_conf->changeName[i].name);
+                }else {
+                    //判断是否统一改名
+                	if(floor_conf->reName[0] != 0) {
+                		sprintf(strtemp,"%d",floor_conf->dispLastFloor);
+                		strcat(strtemp,floor_conf->reName);
+                	}else
+			       		sprintf(strtemp,"%dF",floor_conf->dispLastFloor);
+                }
+            }
+			if(floor_conf->floorStatus == UP)
+				strcat(strtemp,up_utf8);
+			if(floor_conf->floorStatus == DOWN)
+				strcat(strtemp,down_utf8);
+			if(floor_conf->floorStatus == PAUSE)
+				strcat(strtemp,pause_utf8);
+			if(floor_conf->floorStatus == EXCEPTION)
+				strcat(strtemp,exception_utf8);
+			strcat(str1,strtemp);
+		}
+	}
+printf("=======dahua_ipc_str end=======,%s\n",str1);
+//----------------------------- 组包结束 -------------------
+
+	dahua_send(ipc_conf->userName,ipc_conf->passwd,ipc_conf->ipAddr,str1);
+
+    return 0;  
+}
+
+static int dahua_pos_str(char *inbuf,int line,int delay)
+{
+	
+	return 0;
 }

@@ -37,8 +37,8 @@ end
 
 function action_get_floor_mess()
 	local set = tonumber(luci.http.formvalue("set"))
-	local floor_below =  tonumber(luci.sys.exec("uci get floorset.floor.below")) - 1
-	local floor_above =  tonumber(luci.sys.exec("uci get floorset.floor.above")) - 1
+	local floor_below =  tonumber(luci.sys.exec("uci get floorset.floor.below"))
+	local floor_above =  tonumber(luci.sys.exec("uci get floorset.floor.above"))
 	local max_floor = floor_below
 	if floor_above>floor_below then
 		max_floor = floor_above
@@ -63,8 +63,8 @@ end
 
 function action_get_floor_list()
 	local set = tonumber(luci.http.formvalue("set"))
-	local floor_below =  tonumber(luci.sys.exec("uci get floorset.floor.below")) - 1
-	local floor_above =  tonumber(luci.sys.exec("uci get floorset.floor.above")) - 1
+	local floor_below =  tonumber(luci.sys.exec("uci get floorset.floor.below"))
+	local floor_above =  tonumber(luci.sys.exec("uci get floorset.floor.above"))
 
 	local ret
 	local str_html = "<option >平均层高</option>"
@@ -181,7 +181,7 @@ function action_calc_average()
 		if index<=floor_above then
 			luci.sys.exec("uci set floorset.altitu.floorA%d=%d" % {index,current_altitu})
 		else
-			luci.sys.exec("uci set floorset.altitu.floorB%d=%d" % {index-floor,current_altitu})
+			luci.sys.exec("uci set floorset.altitu.floorB%d=%d" % {index-floor_above,current_altitu})
 		end
 		luci.sys.exec("uci commit")
 		rv = {

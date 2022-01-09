@@ -28,6 +28,10 @@ volatile int uart_len = 0;
 //ipc的刷新周期
 volatile int delay = 1;
 volatile int key_count = 0;
+//默认检测方式1:光耦  2:大气压
+#define DETECT_TYPE_INT   1
+#define DETECT_TYPE_HP303 2
+volatile int delete_type = 1;
 //重启标志
 int reboot = 0;
 int recovery = 0;
@@ -49,12 +53,13 @@ const char * status_to_string(uint8_t status)
 	}
 	return "DEFAULT";
 }
-#ifdef SUPPORT_INT_DETECTION
+
 //线程,不断获取中断状态
 void *read_int_thread(void) {
 	int int_count;
 	//printf("go to thread\n");
 	while(1) {
+		if(delete_type == DETECT_TYPE_INT) {
 		//获取当前楼层
 		floor_conf->currentFloor = get_int_count();
 		if((floor_conf->currentFloor != floor_conf->lastFloor) || (floor_conf->floorStatus != floor_conf->lastFloorStatus)) {
@@ -79,10 +84,11 @@ void *read_int_thread(void) {
 			floor_conf->lastFloorStatus = floor_conf->floorStatus;
 			//printf("get count=%d status=%d\n",floor_conf->currentFloor,floor_conf->floorStatus);
 		}
+		}
 		usleep(50*1000);//50ms
 	}
 }
-#endif
+
 //再开启一个线程,判断复位按键以及恢复出厂设置按键的检测
 void *read_key_thread(void) {
 	while(1) {
@@ -120,7 +126,6 @@ void *read_key_thread(void) {
 	}
 }
 
-#ifdef SUPPORT_HP303S
 #define ALLOW_DIFF 100	//cm
 enum Status {
 	MOVE_STOP = 1,
@@ -288,7 +293,7 @@ int get_floor_by_altitu(void)
 				mMoveStatus.move_distance += floor_conf->floorAltitu;
 			}
 		}
-#else
+#elif 0
 		floor_conf->currentAltitu = mMoveStatus.total_altitu;
 		if((PAUSE == floor_conf->floorStatus) || (UP == floor_conf->floorStatus))
 			float_floor = (float)mMoveStatus.total_altitu / (float)floor_conf->floorAltitu + 0.3 - floor_conf->floorBelow + 1;
@@ -309,6 +314,22 @@ int get_floor_by_altitu(void)
 		}
 		pos_debug("state=%s,floor_altitu=%d,current_altitu=%d,float_floor=%f,floor=%d",
 			status_to_string(floor_conf->floorStatus),floor_conf->floorAltitu,mMoveStatus.total_altitu,float_floor,floor_conf->currentFloor);
+	
+#else
+		floor_conf->currentAltitu = mMoveStatus.total_altitu;
+		pos_debug("before state=%s,floor_altitu=%d,current_altitu=%d,floor=%d",
+			status_to_string(floor_conf->floorStatus),floor_conf->floorAltitu,mMoveStatus.total_altitu,floor_conf->currentFloor);
+	
+		if((PAUSE == floor_conf->floorStatus) || (UP == floor_conf->floorStatus))
+			floor_conf->currentFloor = get_floor_by_altitu_bables(mMoveStatus.total_altitu,100,floor_conf->floorStatus);
+		else if(DOWN == floor_conf->floorStatus)
+			floor_conf->currentFloor = get_floor_by_altitu_bables(mMoveStatus.total_altitu,100,floor_conf->floorStatus);
+		//stable status,reset altitu
+		if((PAUSE == floor_conf->floorStatus) && (mMoveStatus.status == MOVE_STOP))
+			mMoveStatus.total_altitu = get_altitu_by_floor_tables(floor_conf->currentFloor);
+		pos_debug("state=%s,floor_altitu=%d,current_altitu=%d,floor=%d",
+			status_to_string(floor_conf->floorStatus),floor_conf->floorAltitu,mMoveStatus.total_altitu,floor_conf->currentFloor);
+	
 	}
 #endif
 	return floor_conf->currentFloor;
@@ -321,7 +342,6 @@ void *read_hp303s_thread(void) {
 	if(HP303_open() == false) {
 		return;
 	}
-	//开始过滤掉无用数据
 	while(1) {
 		if(HP303_read(0.05,&press,&altitu,&temp) == false) {
 			usleep(50*1000);
@@ -330,6 +350,7 @@ void *read_hp303s_thread(void) {
 			break;
 	}
 	while(1) {
+		if(delete_type == DETECT_TYPE_HP303) {
 		//获取当前楼层
 		floor_conf->currentFloor = get_floor_by_altitu();
 		if((floor_conf->currentFloor != floor_conf->lastFloor) || (floor_conf->floorStatus != floor_conf->lastFloorStatus)) {
@@ -355,38 +376,33 @@ void *read_hp303s_thread(void) {
 			floor_conf->lastFloorStatus = floor_conf->floorStatus;
 			printf("-------------floor status update,floor=%d,status=%s\n",floor_conf->currentFloor,status_to_string(floor_conf->floorStatus));
 		}
-		usleep(250*1000);
+		}
+		usleep(300*1000);
 	}
 }
-#endif
 
-#ifdef SUPPORT_INT_DETECTION
-	pthread_t read_int_id = NULL;
-#endif
-#ifdef SUPPORT_HP303S
-	pthread_t read_hp303s_id = NULL;
-	int hp303s_fd = 0;
-#endif
+pthread_t read_int_id = NULL;
+pthread_t read_hp303s_id = NULL;
+int hp303s_fd = 0;
 
 int main()
 {
 	int ret,i;
 	pthread_t read_key_id = NULL;
+	char retMsg[50];
+	uci_get("uci get ipcset.ipc.detect",retMsg,sizeof(retMsg));
+	printf("get detect type = %s\n",retMsg);
+	delete_type = atoi(retMsg);
 	if(Debug)
 		printf( "page size=%d\n",getpagesize(  ) );
 	//开机-根据配置文件是否初始化设备
 	first_run();
 	//开启两个线程,一个检测电梯一个检测按键
-#ifdef SUPPORT_INT_DETECTION
 	ret = pthread_create(&read_int_id, NULL, (void*)read_int_thread, NULL);
     if(ret){
         printf("Create int pthread error!/n");
         //return 1;
     }
-#endif
-#ifdef SUPPORT_HP303S
-	
-#endif
     ret = pthread_create(&read_key_id, NULL, (void*)read_key_thread, NULL);
     if(ret){
         printf("Create key pthread error!/n");
@@ -401,19 +417,24 @@ int main()
 			parse_ipc_conf();
 			//如果楼显打开
 			if(ipc_conf->floorEnable == 1) {
+				uci_get("uci get ipcset.ipc.detect",retMsg,sizeof(retMsg));
+				printf("get detect type = %s\n",retMsg);
+				delete_type = atoi(retMsg);
 				//解析并更新配置
 				parse_floor_conf();
-#ifdef SUPPORT_HP303S
-				mMoveStatus.total_altitu = (floor_conf->startFloor + floor_conf->floorBelow - 1) * floor_conf->floorAltitu;
-#endif
-				//设置底层楼层计数
-				//set_int_count(floor_conf->currentFloor);
+				if(delete_type == DETECT_TYPE_HP303) {
+					mMoveStatus.total_altitu = get_altitu_by_floor_tables(floor_conf->startFloor);
+					pos_debug("update altitu = %d",mMoveStatus.total_altitu);
+				}
+				//else
+					//设置底层楼层计数
+				//	set_int_count(floor_conf->currentFloor);
 				//清除显示
 				if((i = findIpcVersionIndex()) != -1) {
 					ipcFmt[i].func(" ",50,50, 1,0);
-					ipcFmt[i].func(" ",50,100,2,0);
-					ipcFmt[i].func(" ",50,150,3,0);
-					ipcFmt[i].func(" ",50,200,4,0);
+					//ipcFmt[i].func(" ",50,100,2,0);
+					//ipcFmt[i].func(" ",50,150,3,0);
+					//ipcFmt[i].func(" ",50,200,4,0);
 				}
 			}
 			//如果pos显示打开
@@ -495,9 +516,13 @@ int first_run(void) {
 	parse_ipc_conf();
 	parse_floor_conf();
 	//设置底层楼层计数
-#ifdef SUPPORT_INT_DETECTION
-	set_int_count(floor_conf->currentFloor);
-#endif
+	if(delete_type == DETECT_TYPE_INT)
+		set_int_count(floor_conf->currentFloor);
+	if(delete_type == DETECT_TYPE_HP303) {
+		mMoveStatus.total_altitu = get_altitu_by_floor_tables(floor_conf->startFloor);
+		pos_debug("update altitu first = %d",mMoveStatus.total_altitu);
+	}
+
 	parse_pos_conf();
 	//初始化设备
 	init_dev();
@@ -507,7 +532,6 @@ int first_run(void) {
 	system("reg w 0x60 0x00583701");
 #endif
 
-#ifdef SUPPORT_HP303S
 	//ttyS0 as simulate I2C
 	if(true == HP303_open()) {
 		ret = pthread_create(&read_hp303s_id, NULL, (void*)read_hp303s_thread, NULL);
@@ -515,7 +539,6 @@ int first_run(void) {
         	printf("Create hp303s pthread error!/n");
    		}
 	}
-#endif
 	return 0;
 }
 

@@ -57,7 +57,7 @@ struct shared_floor_conf
 	//添加不显示楼层,跃层,改名楼层
 	int noDisp[110];//最大长度为地面楼层数+地下楼层数
 	//int yueFloor[110];
-	ChangeFloor changeName[10]; 
+	ChangeFloor changeName[50]; 
 	//统一改名
 	char reName[100];
 #ifdef SUPPORT_HP303S
